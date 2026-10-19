@@ -1,7 +1,6 @@
 package com.jonas.eurder.api.dto;
 
 import com.jonas.eurder.domain.Customer;
-import jakarta.validation.Valid;
 import org.springframework.stereotype.Component;
 
 @Component
