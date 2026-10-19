@@ -7,7 +7,9 @@ import com.jonas.eurder.domain.Item;
 import com.jonas.eurder.repository.ItemRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ItemService {
 
     private static final Logger logger = LoggerFactory.getLogger(ItemService.class);
