@@ -1,10 +1,12 @@
 package com.jonas.eurder.repository;
 
 import com.jonas.eurder.domain.Order;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Repository
 public class OrderRepository {
 
     private final ConcurrentHashMap<String, Order> orders;

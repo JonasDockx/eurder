@@ -1,5 +1,6 @@
 package com.jonas.eurder.api;
 
+import com.jonas.eurder.service.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -32,6 +33,12 @@ public class GlobalExceptionHandler {
                         (a, b) -> a));
         logger.warn("Validation failed: {}", errors.keySet());
         return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<String> handleNotFoundArguments(NotFoundException exception) {
+        logger.warn(exception.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
