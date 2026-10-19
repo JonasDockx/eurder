@@ -14,7 +14,7 @@ public class Customer {
         this.id = UUID.randomUUID().toString();
         this.firstName = validateNotBlank(firstName, "First name");
         this.lastName = validateNotBlank(lastName, "Last name");
-        this.email = validateNotBlank(email, "e-mail");
+        this.email = validateNotBlank(email, "E-mail");
         this.address = validateNotNull(address, "Address");
         this.phoneNumber = validateNotBlank(phoneNumber, "Phone number");
     }
