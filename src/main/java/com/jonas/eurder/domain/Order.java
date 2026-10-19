@@ -21,6 +21,10 @@ public class Order {
         }
     }
 
+    public String getId() {
+        return id;
+    }
+
     public BigDecimal getTotalPrice() {
         return itemGroups.stream()
                 .map(ItemGroup::getTotalPrice)
