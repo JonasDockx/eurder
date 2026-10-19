@@ -8,7 +8,6 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CustomerControllerIntegrationTest {
@@ -38,5 +37,27 @@ class CustomerControllerIntegrationTest {
                 .statusCode(201)
                 .body("id", notNullValue())
                 .body("firstName", equalTo("Jonas"));
+    }
+
+    @Test
+    void createCustomerWithInvalidEmail_thenShouldExpect400Error() {
+        String requestBody = """
+                {
+                    "firstName": "Jonas",
+                    "lastName": "Dockx",
+                    "email": "jonas",
+                    "address": { "street": "Test street", "houseNumber": "1", "postalCode": "1000", "city": "Brussels" },
+                    "phoneNumber": "0123456789"
+                }
+                """;
+
+        given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .when()
+                .post("customers")
+                .then()
+                .statusCode(400);
     }
 }
