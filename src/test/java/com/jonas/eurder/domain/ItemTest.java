@@ -56,4 +56,22 @@ class ItemTest {
         assertThatThrownBy(() -> new Item("Book A", "A long book", new BigDecimal("14.99"), -5))
                 .isInstanceOf(IllegalArgumentException.class);
     }
+
+    @Test
+    void decreaseStock_givenEnoughStock_thenStockIsReduced() {
+        Item item = new Item("Book A", "A long book", new BigDecimal("14.99"), 5);
+
+        item.decreaseStock(2);
+
+        assertThat(item.getAmount()).isEqualTo(3);
+    }
+
+    @Test
+    void decreaseStock_givenMoreThanInStock_thenStockBecomesZero() {
+        Item item = new Item("Book A", "A long book", new BigDecimal("14.99"), 1);
+
+        item.decreaseStock(3);
+
+        assertThat(item.getAmount()).isZero();
+    }
 }

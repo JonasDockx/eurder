@@ -39,4 +39,8 @@ public class Item {
     public int getAmount() {
         return amount;
     }
+
+    public void decreaseStock(int orderedAmount) {
+        this.amount = Math.max(0, amount - orderedAmount);
+    }
 }
