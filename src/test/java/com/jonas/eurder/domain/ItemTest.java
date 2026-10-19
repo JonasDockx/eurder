@@ -67,11 +67,11 @@ class ItemTest {
     }
 
     @Test
-    void decreaseStock_givenMoreThanInStock_thenStockBecomesZero() {
+    void decreaseStock_givenMoreThanInStock_thenStockBecomesNegative() {
         Item item = new Item("Book A", "A long book", new BigDecimal("14.99"), 1);
 
         item.decreaseStock(3);
 
-        assertThat(item.getAmount()).isZero();
+        assertThat(item.getAmount()).isEqualTo(-2);
     }
 }

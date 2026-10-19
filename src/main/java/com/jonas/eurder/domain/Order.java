@@ -25,6 +25,14 @@ public class Order {
         return id;
     }
 
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public List<ItemGroup> getItemGroups() {
+        return itemGroups;
+    }
+
     public BigDecimal getTotalPrice() {
         return itemGroups.stream()
                 .map(ItemGroup::getTotalPrice)
