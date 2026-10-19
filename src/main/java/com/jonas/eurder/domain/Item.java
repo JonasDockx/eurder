@@ -17,7 +17,7 @@ public class Item {
         this.name = validateNotBlank(name, "Name");
         this.description = validateNotBlank(description, "Description");
         this.price = validateNotNegative(validateNotNull(price, "Price"), "Price");
-        this.amount = validateNotNegative(validateNotNull(amount, "Amount"), "Amount");;
+        this.amount = validateNotNegative(amount, "Amount");
     }
 
     public String getId() {

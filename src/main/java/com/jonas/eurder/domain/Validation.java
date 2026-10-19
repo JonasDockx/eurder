@@ -36,4 +36,11 @@ public final class Validation {
         return value;
     }
 
+    public static int validatePositive(int value, String fieldName) {
+        if (value <= 0) {
+            throw new IllegalArgumentException(fieldName + " must be 0 or more");
+        }
+        return value;
+    }
+
 }
