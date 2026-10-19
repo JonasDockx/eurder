@@ -2,6 +2,9 @@ package com.jonas.eurder.domain;
 
 import java.util.UUID;
 
+import static com.jonas.eurder.domain.Validation.validateNotBlank;
+import static com.jonas.eurder.domain.Validation.validateNotNull;
+
 public class Customer {
     private final String id;
     private final String firstName;
@@ -41,19 +44,5 @@ public class Customer {
 
     public String getPhoneNumber() {
         return phoneNumber;
-    }
-
-    private static String validateNotBlank(String value, String fieldName) {
-        if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(fieldName + " must be provided");
-        }
-        return value;
-    }
-
-    private static <T> T validateNotNull(T value, String fieldName) {
-        if (value == null) {
-            throw new IllegalArgumentException(fieldName + " must be provided");
-        }
-        return value;
     }
 }
