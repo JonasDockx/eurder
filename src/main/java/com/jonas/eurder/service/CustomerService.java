@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomerService {
 
-    private final Logger logger = LoggerFactory.getLogger(CustomerService.class);
+    private static final Logger logger = LoggerFactory.getLogger(CustomerService.class);
 
     private final CustomerRepository customerRepository;
     private final CustomerMapper customerMapper;

@@ -20,8 +20,6 @@ public class CustomerRepository {
     }
 
     public Optional<Customer> getById(String id) {
-        return customers.values().stream()
-                .filter(customer -> customer.getId().equals(id))
-                .findFirst();
+        return Optional.ofNullable(customers.get(id));
     }
 }

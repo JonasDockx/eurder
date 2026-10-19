@@ -1,7 +1,9 @@
 package com.jonas.eurder.api.dto;
 
 import com.jonas.eurder.domain.Address;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AddressMapper {
 
     public Address toAddress(AddressDTO dto) {

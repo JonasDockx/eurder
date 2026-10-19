@@ -6,7 +6,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class CustomerMapper {
 
-    private final AddressMapper addressMapper = new AddressMapper();
+    private final AddressMapper addressMapper;
+
+    public CustomerMapper(AddressMapper addressMapper) {
+        this.addressMapper = addressMapper;
+    }
 
     public Customer toCustomer(CreateCustomerDTO dto) {
         return new Customer(

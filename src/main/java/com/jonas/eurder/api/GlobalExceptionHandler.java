@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
@@ -30,8 +29,14 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.toMap(FieldError::getField,
                         fieldError -> Objects.requireNonNullElse(fieldError.getDefaultMessage(),
                                 "invalid"),
-                                (a, b) -> a));
+                        (a, b) -> a));
         logger.warn("Validation failed: {}", errors.keySet());
         return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleUnexpected(Exception exception) {
+        logger.error("Unexpected error", exception);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong.");
     }
 }

@@ -17,6 +17,6 @@ class CustomerRepositoryTest {
     void givenSavedCustomer_whenGetById_thenShouldReturnTheSameCustomer() {
         customerRepository.save(customer);
 
-        assertThat(customerRepository.getById(customer.getId()).equals(customer));
+        assertThat(customerRepository.getById(customer.getId())).contains(customer);
     }
 }
