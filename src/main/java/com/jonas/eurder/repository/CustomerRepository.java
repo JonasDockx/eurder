@@ -27,4 +27,8 @@ public class CustomerRepository {
     public List<Customer> getAll() {
         return List.copyOf(customers.values());
     }
+
+    public boolean existsById(String id) {
+        return customers.containsKey(id);
+    }
 }

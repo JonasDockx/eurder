@@ -2,7 +2,9 @@ package com.jonas.eurder.api.dto.order;
 
 import com.jonas.eurder.api.dto.itemgroup.ItemGroupDTO;
 import com.jonas.eurder.api.dto.itemgroup.ItemGroupMapper;
+import com.jonas.eurder.domain.ItemGroup;
 import com.jonas.eurder.domain.Order;
+import com.jonas.eurder.domain.OrderReport;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -28,6 +30,33 @@ public class OrderMapper {
                 order.getCustomerId(),
                 itemGroupDTOS,
                 order.getTotalPrice()
+        );
+    }
+
+    public OrderReportDTO toReportDTO(OrderReport report) {
+        return new OrderReportDTO(
+                report.getOrders().stream()
+                        .map(this::toOrderInReportDTO)
+                        .toList(),
+                report.getTotalPrice()
+        );
+    }
+
+    private OrderInReportDTO toOrderInReportDTO(Order order) {
+        return new OrderInReportDTO(
+                order.getId(),
+                order.getItemGroups().stream()
+                        .map(this::toItemGroupInReportDTO)
+                        .toList(),
+                order.getTotalPrice()
+        );
+    }
+
+    private ItemGroupInReportDTO toItemGroupInReportDTO(ItemGroup itemGroup) {
+        return new ItemGroupInReportDTO(
+                itemGroup.getItemName(),
+                itemGroup.getAmount(),
+                itemGroup.getTotalPrice()
         );
     }
 }

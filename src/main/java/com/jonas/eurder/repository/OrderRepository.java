@@ -3,6 +3,7 @@ package com.jonas.eurder.repository;
 import com.jonas.eurder.domain.Order;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,5 +22,11 @@ public class OrderRepository {
 
     public Optional<Order> getById(String id) {
         return Optional.ofNullable(orders.get(id));
+    }
+
+    public List<Order> getByCustomerId(String customerId) {
+        return orders.values().stream()
+                .filter(order -> order.getCustomerId().equals(customerId))
+                .toList();
     }
 }

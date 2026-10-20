@@ -4,10 +4,8 @@ import com.jonas.eurder.api.dto.itemgroup.CreateItemGroupDTO;
 import com.jonas.eurder.api.dto.order.CreateOrderDTO;
 import com.jonas.eurder.api.dto.order.OrderDTO;
 import com.jonas.eurder.api.dto.order.OrderMapper;
-import com.jonas.eurder.domain.Customer;
-import com.jonas.eurder.domain.Item;
-import com.jonas.eurder.domain.ItemGroup;
-import com.jonas.eurder.domain.Order;
+import com.jonas.eurder.api.dto.order.OrderReportDTO;
+import com.jonas.eurder.domain.*;
 import com.jonas.eurder.repository.CustomerRepository;
 import com.jonas.eurder.repository.ItemRepository;
 import com.jonas.eurder.repository.OrderRepository;
@@ -52,6 +50,15 @@ public class OrderService {
         orderRepository.save(order);
         logger.info("Order {} placed by customer {}", order.getId(), customer.getId());
         return orderMapper.toDTO(order);
+    }
+
+    public OrderReportDTO getOrderReport(String customerId) {
+        if (!customerRepository.existsById(customerId)) {
+            throw new NotFoundException("Customer with id " + customerId + " cannot be found");
+        }
+        OrderReport report = new OrderReport(orderRepository.getByCustomerId(customerId));
+        logger.info("Order report requested for customer {}", customerId);
+        return orderMapper.toReportDTO(report);
     }
 
     private static @NonNull List<ItemGroup> createItemGroupsAndReduceStock(CreateOrderDTO dto, Map<String, Item> itemsById, LocalDate orderDate) {

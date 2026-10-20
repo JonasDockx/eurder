@@ -48,4 +48,16 @@ class CustomerRepositoryTest {
     void givenNoCustomers_whenGetById_thenReturnsEmptyOptional() {
         assertThat(customerRepository.getById("123")).isEmpty();
     }
+
+    @Test
+    void givenExistingCustomer_whenExistsById_shouldReturnTrue() {
+        customerRepository.save(customer);
+
+        assertThat(customerRepository.existsById(customer.getId())).isTrue();
+    }
+
+    @Test
+    void givenNonExistingCustomer_whenExistsById_shuldReturnFalse() {
+        assertThat(customerRepository.existsById("NonExistingId")).isFalse();
+    }
 }
