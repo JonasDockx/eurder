@@ -1,6 +1,7 @@
 package com.jonas.eurder.domain;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public final class Validation {
 
@@ -41,6 +42,14 @@ public final class Validation {
             throw new IllegalArgumentException(fieldName + " must be 0 or more");
         }
         return value;
+    }
+
+    public static <T> List<T> validateNotEmpty(List<T> values, String fieldName) {
+        validateNotNull(values, fieldName);
+        if (values.isEmpty()) {
+            throw new IllegalArgumentException(fieldName + " must contain at least one element");
+        }
+        return values;
     }
 
 }

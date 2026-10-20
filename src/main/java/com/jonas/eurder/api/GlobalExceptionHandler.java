@@ -1,5 +1,6 @@
 package com.jonas.eurder.api;
 
+import com.jonas.eurder.service.exception.ForbiddenException;
 import com.jonas.eurder.service.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleNotFoundArguments(NotFoundException exception) {
         logger.warn(exception.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<String> handleForbidden(ForbiddenException exception) {
+        logger.warn("Forbidden: {}", exception.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exception.getMessage());
     }
 
     @ExceptionHandler(Exception.class)

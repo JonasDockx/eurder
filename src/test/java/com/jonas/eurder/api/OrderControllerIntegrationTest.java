@@ -1,14 +1,12 @@
 package com.jonas.eurder.api;
 
-import com.jonas.eurder.domain.Address;
-import com.jonas.eurder.domain.Customer;
-import com.jonas.eurder.domain.Item;
+import com.jonas.eurder.domain.*;
 import com.jonas.eurder.repository.CustomerRepository;
 import com.jonas.eurder.repository.ItemRepository;
 import com.jonas.eurder.repository.OrderRepository;
+import io.restassured.RestAssured;
 import io.restassured.config.RestAssuredConfig;
 import io.restassured.http.ContentType;
-import io.restassured.path.json.config.JsonPathConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,9 +14,11 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.config.JsonConfig.jsonConfig;
+import static io.restassured.path.json.config.JsonPathConfig.NumberReturnType.BIG_DECIMAL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 
@@ -57,7 +57,7 @@ class OrderControllerIntegrationTest {
 
         given()
                 .port(port)
-                .config(RestAssuredConfig.config().jsonConfig(jsonConfig().numberReturnType(JsonPathConfig.NumberReturnType.BIG_DECIMAL)))
+                .config(RestAssuredConfig.config().jsonConfig(jsonConfig().numberReturnType(BIG_DECIMAL)))
                 .contentType(ContentType.JSON)
                 .body(requestBody)
                 .when()
@@ -91,7 +91,7 @@ class OrderControllerIntegrationTest {
 
         given()
                 .port(port)
-                .config(RestAssuredConfig.config().jsonConfig(jsonConfig().numberReturnType(JsonPathConfig.NumberReturnType.BIG_DECIMAL)))
+                .config(RestAssuredConfig.config().jsonConfig(jsonConfig().numberReturnType(BIG_DECIMAL)))
                 .contentType(ContentType.JSON)
                 .body(requestBody)
                 .when()
@@ -101,7 +101,7 @@ class OrderControllerIntegrationTest {
     }
 
     @Test
-    void placeOrder_givenKnownCustomerAndNonExistentItem_thenReturns404WithTotalAndShippingDate() {
+    void placeOrder_givenKnownCustomerAndNonExistentItem_thenReturns404AndStockIsUnchanged() {
         Customer customer = new Customer("Jonas", "Dockx", "jonas@test.com",
                 new Address("Test street", "1", "1234", "Brussels"),
                 "012345679");
@@ -123,7 +123,7 @@ class OrderControllerIntegrationTest {
 
         given()
                 .port(port)
-                .config(RestAssuredConfig.config().jsonConfig(jsonConfig().numberReturnType(JsonPathConfig.NumberReturnType.BIG_DECIMAL)))
+                .config(RestAssuredConfig.config().jsonConfig(jsonConfig().numberReturnType(BIG_DECIMAL)))
                 .contentType(ContentType.JSON)
                 .body(requestBody)
                 .when()
@@ -153,7 +153,7 @@ class OrderControllerIntegrationTest {
 
         given()
                 .port(port)
-                .config(RestAssuredConfig.config().jsonConfig(jsonConfig().numberReturnType(JsonPathConfig.NumberReturnType.BIG_DECIMAL)))
+                .config(RestAssuredConfig.config().jsonConfig(jsonConfig().numberReturnType(BIG_DECIMAL)))
                 .contentType(ContentType.JSON)
                 .body(requestBody)
                 .when()
@@ -212,5 +212,125 @@ class OrderControllerIntegrationTest {
                 .statusCode(200);
 
         assertThat(orderRepository.getById(orderId).orElseThrow().getTotalPrice()).isEqualByComparingTo("29.98");
+    }
+
+    @Test
+    void reorder_givenOwnOrder_thenReturns201WithNewOrderAtCurrentPrice() {
+        Customer customer = saveCustomer("Jonas");
+        Item item = saveItem("14.99", 5);
+        Order originalOrder = saveOrder(customer, item, 2);
+
+        item.update("Book A", "A long book", new BigDecimal("20.00"), 5);
+        itemRepository.save(item);
+
+        given()
+                .port(port)
+                .config(RestAssured.config().jsonConfig(jsonConfig().numberReturnType(BIG_DECIMAL)))
+                .contentType(ContentType.JSON)
+                .body(reorderBody(customer.getId()))
+                .when()
+                .post("/orders/" + originalOrder.getId() + "/reorder")
+                .then()
+                .statusCode(201)
+                .body("id", not(equalTo(originalOrder.getId())))
+                .body("customerId", equalTo(customer.getId()))
+                .body("itemGroups[0].itemId", equalTo(item.getId()))
+                .body("itemGroups[0].amount", equalTo(2))
+                .body("totalPrice", comparesEqualTo(new BigDecimal("40.00")));
+
+        assertThat(orderRepository.getById(originalOrder.getId()).orElseThrow().getTotalPrice())
+                .isEqualByComparingTo("29.98");
+        assertThat(itemRepository.getById(item.getId()).orElseThrow().getAmount()).isEqualTo(3);
+    }
+
+    @Test
+    void reorder_givenOrderOfAnotherCustomer_thenReturns403AndStockIsUnchanged() {
+        Customer jonas = saveCustomer("Jonas");
+        Customer bram = saveCustomer("Bram");
+        Item item = saveItem("14.99", 5);
+        Order ordersOfJonas = saveOrder(jonas, item, 2);
+
+        given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(reorderBody(bram.getId()))
+                .when()
+                .post("/orders/" + ordersOfJonas.getId() + "/reorder")
+                .then()
+                .statusCode(403);
+
+        assertThat(itemRepository.getById(item.getId()).orElseThrow().getAmount()).isEqualTo(5);
+    }
+
+    @Test
+    void reorder_givenUnknownOrder_thenReturns404() {
+        Customer customer = saveCustomer("Jonas");
+
+        given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(reorderBody(customer.getId()))
+                .when()
+                .post("/orders/does-not-exist/reorder")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test
+    void reorder_givenUnknownCustomer_thenReturns404() {
+        Customer customer = saveCustomer("Jonas");
+        Item item = saveItem("14.99", 5);
+        Order order = saveOrder(customer, item, 2);
+
+        given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(reorderBody("does-not-exist"))
+                .when()
+                .post("/orders/" + order.getId() + "/reorder")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test
+    void reorder_givenMissingCustomerId_thenReturns400() {
+        Customer customer = saveCustomer("Jonas");
+        Item item = saveItem("14.99", 5);
+        Order order = saveOrder(customer, item, 2);
+
+        given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body("{}")
+                .when()
+                .post("/orders/" + order.getId() + "/reorder")
+                .then()
+                .statusCode(400);
+    }
+
+    private Customer saveCustomer(String firstName) {
+        Customer customer = new Customer(firstName, "Test", firstName.toLowerCase() + "@test.com",
+                new Address("Test street", "1", "1000", "Brussels"),
+                "0123456789");
+        customerRepository.save(customer);
+        return customer;
+    }
+
+    private Item saveItem(String price, int stock) {
+        Item item = new Item("Book A", "A long book", new BigDecimal(price), stock);
+        itemRepository.save(item);
+        return item;
+    }
+
+    private Order saveOrder(Customer customer, Item item, int amount) {
+        Order order = new Order(customer.getId(), List.of(new ItemGroup(item, amount, LocalDate.now())));
+        orderRepository.save(order);
+        return order;
+    }
+
+    private String reorderBody(String customerId) {
+        return """
+                { "customerId": "%s" }
+                """.formatted(customerId);
     }
 }

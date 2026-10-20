@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.jonas.eurder.domain.Validation.validateNotBlank;
+import static com.jonas.eurder.domain.Validation.validateNotEmpty;
 
 public class Order {
     private final String id;
@@ -14,11 +15,7 @@ public class Order {
     public Order(String customerId, List<ItemGroup> itemGroups) {
         this.id = UUID.randomUUID().toString();
         this.customerId = validateNotBlank(customerId, "Customer Id");
-        if (itemGroups.isEmpty()) {
-            throw new IllegalArgumentException("itemGroups list for an order cannot be empty");
-        } else {
-            this.itemGroups = List.copyOf(itemGroups);
-        }
+        this.itemGroups = List.copyOf(validateNotEmpty(itemGroups, "Item groups"));
     }
 
     public String getId() {
@@ -37,5 +34,9 @@ public class Order {
         return itemGroups.stream()
                 .map(ItemGroup::getTotalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public boolean belongsTo(String customerId) {
+        return this.customerId.equals(customerId);
     }
 }

@@ -2,6 +2,7 @@ package com.jonas.eurder.api;
 
 import com.jonas.eurder.api.dto.order.CreateOrderDTO;
 import com.jonas.eurder.api.dto.order.OrderDTO;
+import com.jonas.eurder.api.dto.order.ReorderDTO;
 import com.jonas.eurder.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -21,5 +22,11 @@ public class OrderController {
     @ResponseStatus(HttpStatus.CREATED)
     public OrderDTO createNewOrder(@Valid @RequestBody CreateOrderDTO dto) {
         return orderService.placeOrder(dto);
+    }
+
+    @PostMapping(path = "/{orderId}/reorder", consumes = "application/json", produces = "application/json")
+    @ResponseStatus(HttpStatus.CREATED)
+    public OrderDTO reorder(@PathVariable String orderId, @Valid @RequestBody ReorderDTO dto) {
+        return orderService.reorder(orderId, dto.customerId());
     }
 }

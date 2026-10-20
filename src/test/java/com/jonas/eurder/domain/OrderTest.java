@@ -43,4 +43,20 @@ class OrderTest {
         assertThatThrownBy(() -> new Order(" ", itemGroups))
                 .isInstanceOf(IllegalArgumentException.class);
     }
+
+    @Test
+    void belongsTo_givenTheCustomerWhoPlacedIt_thenReturnsTrue() {
+        Item book = new Item("Book A", "A long book", new BigDecimal("14.99"), 5);
+        Order order = new Order("jonas-id", List.of(new ItemGroup(book, 1, ORDER_DATE)));
+
+        assertThat(order.belongsTo("jonas-id")).isTrue();
+    }
+
+    @Test
+    void belongsTo_givenAnotherCustomer_thenReturnsFalse() {
+        Item book = new Item("Book A", "A long book", new BigDecimal("14.99"), 5);
+        Order order = new Order("jonas-id", List.of(new ItemGroup(book, 1, ORDER_DATE)));
+
+        assertThat(order.belongsTo("bram-id")).isFalse();
+    }
 }
