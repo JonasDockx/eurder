@@ -5,6 +5,7 @@ import com.jonas.eurder.domain.Customer;
 import com.jonas.eurder.domain.Item;
 import com.jonas.eurder.repository.CustomerRepository;
 import com.jonas.eurder.repository.ItemRepository;
+import com.jonas.eurder.repository.OrderRepository;
 import io.restassured.config.RestAssuredConfig;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.config.JsonPathConfig;
@@ -32,6 +33,9 @@ class OrderControllerIntegrationTest {
 
     @Autowired
     private ItemRepository itemRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
 
     @Test
     void placeOrder_givenKnownCustomerAndItemInStock_thenReturns201WithTotalAndShippingDate() {
@@ -156,5 +160,57 @@ class OrderControllerIntegrationTest {
                 .post("/orders")
                 .then()
                 .statusCode(400);
+    }
+
+    @Test
+    void givenPlacedOrder_whenItemPriceIsUpdated_thenOrderKeepsTheOriginalPrice() {
+        Customer customer = new Customer("Jonas", "Dockx", "jonas@test.com",
+                new Address("Test street", "1", "1234", "Brussels"),
+                "012345679");
+        customerRepository.save(customer);
+        Item item = new Item("Book A", "A long book", new BigDecimal("14.99"), 5);
+        itemRepository.save(item);
+
+        String originalRequestBody = """
+                {
+                    "customerId": "%s",
+                    "itemGroups": [
+                        {
+                            "itemId": "%s",
+                            "amount": 2
+                        }
+                    ]
+                }
+                """.formatted(customer.getId(), item.getId());
+
+        String orderId = given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(originalRequestBody)
+                .when()
+                .post("/orders")
+                .then()
+                .statusCode(201)
+                .extract().path("id");
+
+        String updatedRequestBody = """
+                {
+                    "name": "Book A",
+                    "description": "A long book",
+                    "price": 50.99,
+                    "amount": 5
+                }
+                """;
+
+        given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(updatedRequestBody)
+                .when()
+                .put("/items/" + item.getId())
+                .then()
+                .statusCode(200);
+
+        assertThat(orderRepository.getById(orderId).orElseThrow().getTotalPrice()).isEqualByComparingTo("29.98");
     }
 }

@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
 class ItemTest {
 
@@ -73,5 +72,38 @@ class ItemTest {
         item.decreaseStock(3);
 
         assertThat(item.getAmount()).isEqualTo(-2);
+    }
+
+    @Test
+    void update_givenValidData_thenAllFieldsChangeButIdStaysTheSame() {
+        Item item = new Item("Book A", "A long book", new BigDecimal("14.99"), 5);
+        String originalId = item.getId();
+
+        item.update("Book B", "A short book", new BigDecimal("9.99"), 10);
+
+        assertThat(item.getId()).isEqualTo(originalId);
+        assertThat(item.getName()).isEqualTo("Book B");
+        assertThat(item.getDescription()).isEqualTo("A short book");
+        assertThat(item.getPrice()).isEqualByComparingTo("9.99");
+        assertThat(item.getAmount()).isEqualTo(10);
+    }
+
+    @Test
+    void update_GivenBlankDescription_thenThrowsIllegalArgumentException() {
+        Item item = new Item("Book A", "A long book", new BigDecimal("14.99"), 5);
+
+        assertThatThrownBy(() -> item.update("Book B", " ", new BigDecimal("9.99"), 10))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void update_givenInvalidPrice_thenItemIsNotChangedAtAll() {
+        Item item = new Item("Book A", "A long book", new BigDecimal("14.99"), 5);
+
+        assertThatThrownBy(() -> item.update("Book B", "A short book", new BigDecimal("-1"), 10))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        assertThat(item.getName()).isEqualTo("Book A");
+        assertThat(item.getPrice()).isEqualByComparingTo("14.99");
     }
 }

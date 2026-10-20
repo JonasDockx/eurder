@@ -40,6 +40,7 @@ public class CustomerService {
     }
 
     public CustomerDTO getCustomer(String id) {
+        logger.info("Fetching customer with id {}", id);
         return customerRepository.getById(id)
                 .map(customerMapper::toDTO)
                 .orElseThrow(() -> new NotFoundException("Customer with id " + id + " could not be found"));

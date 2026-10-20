@@ -7,8 +7,8 @@ import static com.jonas.eurder.domain.Validation.*;
 
 public class Item {
     private final String id;
-    private final String name;
-    private final String description;
+    private String name;
+    private String description;
     private BigDecimal price;
     private int amount;
 
@@ -42,5 +42,17 @@ public class Item {
 
     public void decreaseStock(int orderedAmount) {
         this.amount = amount - orderedAmount;
+    }
+
+    public void update(String name, String description, BigDecimal price, int amount) {
+        String validatedName = validateNotBlank(name, "Name");
+        String validatedDescription = validateNotBlank(description, "Description");
+        BigDecimal validatedPrice = validateNotNegative(validateNotNull(price, "Price"), "Price");
+        int validatedAmount = validateNotNegative(amount, "Amount");
+
+        this.name = validatedName;
+        this.description = validatedDescription;
+        this.price = validatedPrice;
+        this.amount = validatedAmount;
     }
 }
