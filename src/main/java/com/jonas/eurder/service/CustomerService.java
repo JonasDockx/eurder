@@ -1,8 +1,8 @@
 package com.jonas.eurder.service;
 
-import com.jonas.eurder.api.dto.CreateCustomerDTO;
-import com.jonas.eurder.api.dto.CustomerDTO;
-import com.jonas.eurder.api.dto.CustomerMapper;
+import com.jonas.eurder.api.dto.customer.CreateCustomerDTO;
+import com.jonas.eurder.api.dto.customer.CustomerDTO;
+import com.jonas.eurder.api.dto.customer.CustomerMapper;
 import com.jonas.eurder.domain.Customer;
 import com.jonas.eurder.repository.CustomerRepository;
 import com.jonas.eurder.service.exception.NotFoundException;

@@ -1,9 +1,9 @@
 package com.jonas.eurder.service;
 
-import com.jonas.eurder.api.dto.CreateItemGroupDTO;
-import com.jonas.eurder.api.dto.CreateOrderDTO;
-import com.jonas.eurder.api.dto.OrderDTO;
-import com.jonas.eurder.api.dto.OrderMapper;
+import com.jonas.eurder.api.dto.itemgroup.CreateItemGroupDTO;
+import com.jonas.eurder.api.dto.order.CreateOrderDTO;
+import com.jonas.eurder.api.dto.order.OrderDTO;
+import com.jonas.eurder.api.dto.order.OrderMapper;
 import com.jonas.eurder.domain.Customer;
 import com.jonas.eurder.domain.Item;
 import com.jonas.eurder.domain.ItemGroup;

@@ -1,5 +1,6 @@
-package com.jonas.eurder.api.dto;
+package com.jonas.eurder.api.dto.customer;
 
+import com.jonas.eurder.api.dto.address.AddressMapper;
 import com.jonas.eurder.domain.Customer;
 import org.springframework.stereotype.Component;
 

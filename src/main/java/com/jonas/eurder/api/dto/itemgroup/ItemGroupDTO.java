@@ -1,4 +1,4 @@
-package com.jonas.eurder.api.dto;
+package com.jonas.eurder.api.dto.itemgroup;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

@@ -1,4 +1,4 @@
-package com.jonas.eurder.api.dto;
+package com.jonas.eurder.api.dto.item;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

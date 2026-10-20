@@ -1,5 +1,6 @@
-package com.jonas.eurder.api.dto;
+package com.jonas.eurder.api.dto.order;
 
+import com.jonas.eurder.api.dto.itemgroup.CreateItemGroupDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;

@@ -1,4 +1,4 @@
-package com.jonas.eurder.api.dto;
+package com.jonas.eurder.api.dto.address;
 
 import com.jonas.eurder.domain.Address;
 import org.springframework.stereotype.Component;

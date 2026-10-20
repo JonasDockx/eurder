@@ -1,7 +1,7 @@
 package com.jonas.eurder.api;
 
-import com.jonas.eurder.api.dto.CreateItemDTO;
-import com.jonas.eurder.api.dto.ItemDTO;
+import com.jonas.eurder.api.dto.item.CreateItemDTO;
+import com.jonas.eurder.api.dto.item.ItemDTO;
 import com.jonas.eurder.service.ItemService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

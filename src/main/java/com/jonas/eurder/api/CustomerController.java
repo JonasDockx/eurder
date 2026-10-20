@@ -1,7 +1,7 @@
 package com.jonas.eurder.api;
 
-import com.jonas.eurder.api.dto.CreateCustomerDTO;
-import com.jonas.eurder.api.dto.CustomerDTO;
+import com.jonas.eurder.api.dto.customer.CreateCustomerDTO;
+import com.jonas.eurder.api.dto.customer.CustomerDTO;
 import com.jonas.eurder.service.CustomerService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

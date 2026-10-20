@@ -1,7 +1,7 @@
 package com.jonas.eurder.api;
 
-import com.jonas.eurder.api.dto.CreateOrderDTO;
-import com.jonas.eurder.api.dto.OrderDTO;
+import com.jonas.eurder.api.dto.order.CreateOrderDTO;
+import com.jonas.eurder.api.dto.order.OrderDTO;
 import com.jonas.eurder.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

@@ -1,5 +1,6 @@
-package com.jonas.eurder.api.dto;
+package com.jonas.eurder.api.dto.customer;
 
+import com.jonas.eurder.api.dto.address.AddressDTO;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

@@ -1,8 +1,8 @@
 package com.jonas.eurder.service;
 
-import com.jonas.eurder.api.dto.CreateItemDTO;
-import com.jonas.eurder.api.dto.ItemDTO;
-import com.jonas.eurder.api.dto.ItemMapper;
+import com.jonas.eurder.api.dto.item.CreateItemDTO;
+import com.jonas.eurder.api.dto.item.ItemDTO;
+import com.jonas.eurder.api.dto.item.ItemMapper;
 import com.jonas.eurder.domain.Item;
 import com.jonas.eurder.repository.ItemRepository;
 import org.slf4j.Logger;

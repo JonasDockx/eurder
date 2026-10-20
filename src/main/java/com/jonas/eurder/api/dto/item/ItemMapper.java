@@ -1,4 +1,4 @@
-package com.jonas.eurder.api.dto;
+package com.jonas.eurder.api.dto.item;
 
 import com.jonas.eurder.domain.Item;
 import org.springframework.stereotype.Component;

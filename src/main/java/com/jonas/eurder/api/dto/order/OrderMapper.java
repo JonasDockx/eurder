@@ -1,5 +1,7 @@
-package com.jonas.eurder.api.dto;
+package com.jonas.eurder.api.dto.order;
 
+import com.jonas.eurder.api.dto.itemgroup.ItemGroupDTO;
+import com.jonas.eurder.api.dto.itemgroup.ItemGroupMapper;
 import com.jonas.eurder.domain.Order;
 import org.springframework.stereotype.Component;
 
