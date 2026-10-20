@@ -29,4 +29,9 @@ public class CustomerController {
     public List<CustomerDTO> getAllCustomers() {
         return customerService.getAllCustomers();
     }
+
+    @GetMapping(path = "/{id}", produces = "application/json")
+    public CustomerDTO getCustomer(@PathVariable String id) {
+        return customerService.getCustomer(id);
+    }
 }

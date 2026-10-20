@@ -5,6 +5,7 @@ import com.jonas.eurder.api.dto.CustomerDTO;
 import com.jonas.eurder.api.dto.CustomerMapper;
 import com.jonas.eurder.domain.Customer;
 import com.jonas.eurder.repository.CustomerRepository;
+import com.jonas.eurder.service.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -32,8 +33,15 @@ public class CustomerService {
     }
 
     public List<CustomerDTO> getAllCustomers() {
+        logger.info("Fetching all customers");
         return customerRepository.getAll().stream()
                 .map(customerMapper::toDTO)
                 .toList();
+    }
+
+    public CustomerDTO getCustomer(String id) {
+        return customerRepository.getById(id)
+                .map(customerMapper::toDTO)
+                .orElseThrow(() -> new NotFoundException("Customer with id " + id + " could not be found"));
     }
 }

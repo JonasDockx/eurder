@@ -43,4 +43,9 @@ class CustomerRepositoryTest {
                 .isInstanceOf(UnsupportedOperationException.class);
         assertThat(customerRepository.getAll()).hasSize(1);
     }
+
+    @Test
+    void givenNoCustomers_whenGetById_thenReturnsEmptyOptional() {
+        assertThat(customerRepository.getById("123")).isEmpty();
+    }
 }

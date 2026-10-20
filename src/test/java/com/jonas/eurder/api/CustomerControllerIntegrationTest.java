@@ -84,4 +84,37 @@ class CustomerControllerIntegrationTest {
                 // For the line below here, I had to use Claude. Apparently RestAssured's query language is GPath, something I was unfamiliar with
                 .body("find { it.id == '%s' }.firstName".formatted(customer.getId()), equalTo("Pol"));
     }
+
+    @Test
+    void getCustomer_givenSavedCustomer_thenReturns200AndContainsThatCustomer() {
+        Customer customer = new Customer("Vital", "De Kwal", "vital@test.com",
+                new Address("Test street", "3", "9999", "Brussels"),
+                "0000000002");
+        customerRepository.save(customer);
+
+        given()
+                .port(port)
+                .when()
+                .get("/customers/" + customer.getId())
+                .then()
+                .statusCode(200)
+                .body("id", equalTo(customer.getId()))
+                .body("firstName", equalTo("Vital"));
+
+    }
+
+    @Test
+    void getCustomer_givenNonExistentId_thenReturns404() {
+        Customer customer = new Customer("Marcel", "De Veldmuis", "marcel@test.com",
+                new Address("Test street", "4", "1001", "Brussels"),
+                "0000000003");
+        customerRepository.save(customer);
+
+        given()
+                .port(port)
+                .when()
+                .get("/customers/123")
+                .then()
+                .statusCode(404);
+    }
 }
