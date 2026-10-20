@@ -12,6 +12,7 @@ import com.jonas.eurder.repository.CustomerRepository;
 import com.jonas.eurder.repository.ItemRepository;
 import com.jonas.eurder.repository.OrderRepository;
 import com.jonas.eurder.service.exception.NotFoundException;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -40,9 +41,30 @@ public class OrderService {
     }
 
     public OrderDTO placeOrder(CreateOrderDTO dto) {
-        Customer customer = customerRepository.getById(dto.customerId())
-                .orElseThrow(() -> new NotFoundException("Customer with id " + dto.customerId() + " cannot be found"));
+        Customer customer = findCustomer(dto);
 
+        Map<String, Item> itemsById = findItems(dto);
+
+        LocalDate orderDate = LocalDate.now();
+        List<ItemGroup> itemGroups = createItemGroupsAndReduceStock(dto, itemsById, orderDate);
+
+        Order order = new Order(customer.getId(), itemGroups);
+        orderRepository.save(order);
+        logger.info("Order {} placed by customer {}", order.getId(), customer.getId());
+        return orderMapper.toDTO(order);
+    }
+
+    private static @NonNull List<ItemGroup> createItemGroupsAndReduceStock(CreateOrderDTO dto, Map<String, Item> itemsById, LocalDate orderDate) {
+        List<ItemGroup> itemGroups = new ArrayList<>();
+        for (CreateItemGroupDTO groupDTO : dto.itemGroups()) {
+            Item item = itemsById.get(groupDTO.itemId());
+            itemGroups.add(new ItemGroup(item, groupDTO.amount(), orderDate));
+            item.decreaseStock(groupDTO.amount());
+        }
+        return itemGroups;
+    }
+
+    private @NonNull Map<String, Item> findItems(CreateOrderDTO dto) {
         // Went for a for loop below to be able to show the relevant id, perhaps not necessary
         Map<String, Item> itemsById = new HashMap<>();
         for (CreateItemGroupDTO groupDTO : dto.itemGroups()) {
@@ -50,18 +72,11 @@ public class OrderService {
                     .orElseThrow(() -> new NotFoundException("Item with id " + groupDTO.itemId() + " cannot be found"));
             itemsById.put(item.getId(), item);
         }
+        return itemsById;
+    }
 
-        LocalDate orderDate = LocalDate.now();
-        List<ItemGroup> itemGroups = new ArrayList<>();
-        for (CreateItemGroupDTO groupDTO : dto.itemGroups()) {
-            Item item = itemsById.get(groupDTO.itemId());
-            itemGroups.add(new ItemGroup(item, groupDTO.amount(), orderDate));
-            item.decreaseStock(groupDTO.amount());
-        }
-
-        Order order = new Order(customer.getId(), itemGroups);
-        orderRepository.save(order);
-        logger.info("Order {} placed by customer {}", order.getId(), customer.getId());
-        return orderMapper.toDTO(order);
+    private @NonNull Customer findCustomer(CreateOrderDTO dto) {
+        return customerRepository.getById(dto.customerId())
+                .orElseThrow(() -> new NotFoundException("Customer with id " + dto.customerId() + " cannot be found"));
     }
 }
