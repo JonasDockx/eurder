@@ -5,6 +5,7 @@ import com.jonas.eurder.domain.Customer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CustomerRepositoryTest {
 
@@ -18,5 +19,28 @@ class CustomerRepositoryTest {
         customerRepository.save(customer);
 
         assertThat(customerRepository.getById(customer.getId())).contains(customer);
+    }
+
+    @Test
+    void givenNoCustomers_whenGetAll_thenReturnsEmptyList() {
+        assertThat(customerRepository.getAll()).isEmpty();
+    }
+
+    @Test
+    void givenSavedCustomers_whenGetALL_thenReturnsAllOfThem() {
+        Customer otherCustomer = new Customer("Jos", "De Vos", "jos@test.com", address, "0987654321");
+        customerRepository.save(customer);
+        customerRepository.save(otherCustomer);
+
+        assertThat(customerRepository.getAll()).containsExactlyInAnyOrder(customer, otherCustomer);
+    }
+
+    @Test
+    void getAll_returnsACopyThatCannotChangeTheRepository() {
+        customerRepository.save(customer);
+
+        assertThatThrownBy(() -> customerRepository.getAll().clear())
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThat(customerRepository.getAll()).hasSize(1);
     }
 }
