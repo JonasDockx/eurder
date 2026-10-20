@@ -15,7 +15,7 @@ public class ItemController {
 
     private final ItemService itemService;
 
-    public ItemController(ItemService itemService, ItemMapper itemMapper) {
+    public ItemController(ItemService itemService) {
         this.itemService = itemService;
     }
 
