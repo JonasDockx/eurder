@@ -3,6 +3,7 @@ package com.jonas.eurder.repository;
 import com.jonas.eurder.domain.Item;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,5 +22,9 @@ public class ItemRepository {
 
     public Optional<Item> getById(String id) {
         return Optional.ofNullable(items.get(id));
+    }
+
+    public Collection<Item> getAll() {
+        return items.values();
     }
 }

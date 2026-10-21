@@ -28,4 +28,19 @@ public class ItemMapper {
                 item.getAmount()
         );
     }
+
+    public ItemWithStockLevelDTO toItemWithStockLevelDTO(Item item) {
+        if (item == null) {
+            return null;
+        }
+
+        return new ItemWithStockLevelDTO(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getPrice(),
+                item.getAmount(),
+                item.getUrgencyLevel()
+        );
+    }
 }

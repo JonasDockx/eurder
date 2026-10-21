@@ -10,6 +10,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Map;
 import java.util.Objects;
@@ -46,6 +47,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleForbidden(ForbiddenException exception) {
         logger.warn("Forbidden: {}", exception.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<String> handleTypeMismatch(MethodArgumentTypeMismatchException exception) {
+        logger.warn("Invalid value '{}' for parameter '{}'", exception.getValue(), exception.getName());
+        return ResponseEntity.badRequest()
+                .body("Invalid value '" + exception.getValue() + "' for parameter '" + exception.getName() + "'");
     }
 
     @ExceptionHandler(Exception.class)
