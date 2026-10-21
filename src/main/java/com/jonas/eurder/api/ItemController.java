@@ -2,11 +2,15 @@ package com.jonas.eurder.api;
 
 import com.jonas.eurder.api.dto.item.CreateItemDTO;
 import com.jonas.eurder.api.dto.item.ItemDTO;
+import com.jonas.eurder.api.dto.item.ItemWithStockLevelDTO;
 import com.jonas.eurder.api.dto.item.UpdateItemDTO;
+import com.jonas.eurder.domain.UrgencyLevel;
 import com.jonas.eurder.service.ItemService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/items")
@@ -28,5 +32,11 @@ public class ItemController {
     @ResponseStatus(HttpStatus.OK)
     public ItemDTO updateItem(@Valid @RequestBody UpdateItemDTO dto, @PathVariable String id) {
         return itemService.updateItem(id, dto);
+    }
+
+    @GetMapping(path = "/stock", produces = "application/json")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ItemWithStockLevelDTO> getItemsWithStockLevels(@RequestParam(required = false) UrgencyLevel urgencyLevel) {
+        return itemService.getItemsWithStockLevels(urgencyLevel);
     }
 }
