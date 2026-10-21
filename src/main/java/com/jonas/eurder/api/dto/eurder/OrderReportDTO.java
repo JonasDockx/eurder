@@ -1,4 +1,4 @@
-package com.jonas.eurder.api.dto.order;
+package com.jonas.eurder.api.dto.eurder;
 
 import java.math.BigDecimal;
 import java.util.List;

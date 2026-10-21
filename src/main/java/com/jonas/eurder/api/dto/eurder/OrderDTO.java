@@ -1,4 +1,4 @@
-package com.jonas.eurder.api.dto.order;
+package com.jonas.eurder.api.dto.eurder;
 
 import com.jonas.eurder.api.dto.itemgroup.ItemGroupDTO;
 

@@ -50,4 +50,13 @@ class OrderRepositoryTest {
         assertThat(orderRepository.getByCustomerId("jonas-id")).isEmpty();
     }
 
+    @Test
+    void givenSavedOrders_whenGetAll_thenReturnsAllOfThem() {
+        Order otherOrder = new Order("bram-id", List.of(new ItemGroup(book, 1, ORDER_DATE)));
+        orderRepository.save(order);
+        orderRepository.save(otherOrder);
+
+        assertThat(orderRepository.getAll()).containsExactlyInAnyOrder(order, otherOrder);
+    }
+
 }

@@ -1,21 +1,26 @@
-package com.jonas.eurder.api.dto.order;
+package com.jonas.eurder.api.dto.eurder;
 
+import com.jonas.eurder.api.dto.address.AddressMapper;
 import com.jonas.eurder.api.dto.itemgroup.ItemGroupDTO;
 import com.jonas.eurder.api.dto.itemgroup.ItemGroupMapper;
+import com.jonas.eurder.domain.Address;
 import com.jonas.eurder.domain.ItemGroup;
 import com.jonas.eurder.domain.Order;
 import com.jonas.eurder.domain.OrderReport;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.List;
 
 @Component
 public class OrderMapper {
 
     private final ItemGroupMapper itemGroupMapper;
+    private final AddressMapper addressMapper;
 
-    public OrderMapper(ItemGroupMapper itemGroupMapper) {
+    public OrderMapper(ItemGroupMapper itemGroupMapper, AddressMapper addressMapper) {
         this.itemGroupMapper = itemGroupMapper;
+        this.addressMapper = addressMapper;
     }
 
     public OrderDTO toDTO(Order order) {
@@ -57,6 +62,28 @@ public class OrderMapper {
                 itemGroup.getItemName(),
                 itemGroup.getAmount(),
                 itemGroup.getTotalPrice()
+        );
+    }
+
+    private ShipmentItemGroupDTO toShipmentItemGroupDTO(ItemGroup itemGroup) {
+        return new ShipmentItemGroupDTO(
+                itemGroup.getItemId(),
+                itemGroup.getItemName(),
+                itemGroup.getAmount()
+        );
+    }
+
+    private List<ShipmentItemGroupDTO> toShipmentItemGroupDTO(Collection<ItemGroup> itemGroups) {
+        return itemGroups.stream()
+                .map(this::toShipmentItemGroupDTO)
+                .toList();
+    }
+
+    public ShipmentDTO toShipmentDTO(Order order, List<ItemGroup> itemGroups, Address shippingAddress) {
+        return new ShipmentDTO(
+                order.getId(),
+                addressMapper.toAddressDTO(shippingAddress),
+                toShipmentItemGroupDTO(itemGroups)
         );
     }
 }

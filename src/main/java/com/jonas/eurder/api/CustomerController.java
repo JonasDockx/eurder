@@ -2,7 +2,7 @@ package com.jonas.eurder.api;
 
 import com.jonas.eurder.api.dto.customer.CreateCustomerDTO;
 import com.jonas.eurder.api.dto.customer.CustomerDTO;
-import com.jonas.eurder.api.dto.order.OrderReportDTO;
+import com.jonas.eurder.api.dto.eurder.OrderReportDTO;
 import com.jonas.eurder.service.CustomerService;
 import com.jonas.eurder.service.OrderService;
 import jakarta.validation.Valid;

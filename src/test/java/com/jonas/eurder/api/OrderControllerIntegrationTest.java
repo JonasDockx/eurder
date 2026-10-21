@@ -308,6 +308,48 @@ class OrderControllerIntegrationTest {
                 .statusCode(400);
     }
 
+    @Test
+    void getShippingToday_returnsTodaysItemGroupsWithShippingAddress() {
+        Customer customer = saveCustomer("Jonas");
+        Item itemInStock = saveItem("14.99", 5);
+        Item itemOutOfStock = saveItem("1.50", 0);
+        LocalDate yesterday = LocalDate.now().minusDays(1);
+        Order order = new Order(customer.getId(), List.of(
+                new ItemGroup(itemInStock, 2, yesterday),       // ships today
+                new ItemGroup(itemOutOfStock, 1, yesterday)));  // ships in 6 days
+        orderRepository.save(order);
+
+        String orderPath = "find { it.orderId == '%s' }".formatted(order.getId());
+
+        given()
+                .port(port)
+                .when()
+                .get("/orders/shipping-today")
+                .then()
+                .statusCode(200)
+                .body("orderId", hasItem(order.getId()))
+                .body(orderPath + ".shippingAddress.street", equalTo("Test street"))
+                .body(orderPath + ".shippingAddress.city", equalTo("Brussels"))
+                .body(orderPath + ".itemGroups", hasSize(1))
+                .body(orderPath + ".itemGroups[0].itemId", equalTo(itemInStock.getId()))
+                .body(orderPath + ".itemGroups[0].amount", equalTo(2));
+    }
+
+    @Test
+    void getShippingToday_doesNotContainOrdersShippingLater() {
+        Customer customer = saveCustomer("Jonas");
+        Item item = saveItem("14.99", 5);
+        Order orderShippingTomorrow = saveOrder(customer, item, 1);
+
+        given()
+                .port(port)
+                .when()
+                .get("/orders/shipping-today")
+                .then()
+                .statusCode(200)
+                .body("orderId", not(hasItem(orderShippingTomorrow.getId())));
+    }
+
     private Customer saveCustomer(String firstName) {
         Customer customer = new Customer(firstName, "Test", firstName.toLowerCase() + "@test.com",
                 new Address("Test street", "1", "1000", "Brussels"),

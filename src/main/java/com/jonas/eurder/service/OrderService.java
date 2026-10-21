@@ -1,10 +1,7 @@
 package com.jonas.eurder.service;
 
+import com.jonas.eurder.api.dto.eurder.*;
 import com.jonas.eurder.api.dto.itemgroup.CreateItemGroupDTO;
-import com.jonas.eurder.api.dto.order.CreateOrderDTO;
-import com.jonas.eurder.api.dto.order.OrderDTO;
-import com.jonas.eurder.api.dto.order.OrderMapper;
-import com.jonas.eurder.api.dto.order.OrderReportDTO;
 import com.jonas.eurder.domain.*;
 import com.jonas.eurder.repository.CustomerRepository;
 import com.jonas.eurder.repository.ItemRepository;
@@ -103,5 +100,25 @@ public class OrderService {
     private Customer findCustomer(String customerId) {
         return customerRepository.getById(customerId)
                 .orElseThrow(() -> new NotFoundException("Customer with id " + customerId + " cannot be found"));
+    }
+
+    public List<ShipmentDTO> getShippingToday() {
+        LocalDate today = LocalDate.now();
+        List<ShipmentDTO> shipments = new ArrayList<>();
+
+        for (Order order : orderRepository.getAll()) {
+            List<ItemGroup> itemGroupsShippingToday = order.getItemGroupsShippingOn(today);
+            if (itemGroupsShippingToday.isEmpty()) {
+                continue;
+            }
+            Customer customer = customerRepository.getById(order.getCustomerId())
+                    .orElseThrow(() -> new IllegalStateException(
+                            "Order " + order.getId() + " refers to unknown customer " + order.getCustomerId()));
+            shipments.add(orderMapper.toShipmentDTO(order, itemGroupsShippingToday, customer.getAddress()));
+        }
+
+        logger.info("{} order(s) found with item groups shipping today", shipments.size());
+        return shipments;
+
     }
 }

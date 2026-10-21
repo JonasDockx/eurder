@@ -3,6 +3,7 @@ package com.jonas.eurder.repository;
 import com.jonas.eurder.domain.Order;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,5 +29,9 @@ public class OrderRepository {
         return orders.values().stream()
                 .filter(order -> order.getCustomerId().equals(customerId))
                 .toList();
+    }
+
+    public Collection<Order> getAll() {
+        return orders.values();
     }
 }

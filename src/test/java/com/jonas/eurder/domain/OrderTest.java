@@ -59,4 +59,24 @@ class OrderTest {
 
         assertThat(order.belongsTo("bram-id")).isFalse();
     }
+
+    @Test
+    void getItemGroupsShippingOn_returnsOnlyGroupsShippingOnThatDate() {
+        Item book = new Item("Book A", "A long book", new BigDecimal("14.99"), 5);   // in stock
+        Item pen = new Item("Pen", "A blue pen", new BigDecimal("1.50"), 0);         // out of stock
+        ItemGroup bookGroup = new ItemGroup(book, 1, ORDER_DATE);   // ships 2026-10-20
+        ItemGroup penGroup = new ItemGroup(pen, 1, ORDER_DATE);     // ships 2026-10-26
+        Order order = new Order("customer-id", List.of(bookGroup, penGroup));
+
+        assertThat(order.getItemGroupsShippingOn(LocalDate.of(2026, 10, 20))).containsExactly(bookGroup);
+        assertThat(order.getItemGroupsShippingOn(LocalDate.of(2026, 10, 26))).containsExactly(penGroup);
+    }
+
+    @Test
+    void getItemGroupsShippingOn_givenDateWithoutShipments_returnsEmptyList() {
+        Item book = new Item("Book A", "A long book", new BigDecimal("14.99"), 5);
+        Order order = new Order("customer-id", List.of(new ItemGroup(book, 1, ORDER_DATE)));
+
+        assertThat(order.getItemGroupsShippingOn(LocalDate.of(2026, 10, 21))).isEmpty();
+    }
 }

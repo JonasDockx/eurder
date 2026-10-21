@@ -1,6 +1,7 @@
 package com.jonas.eurder.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,5 +39,11 @@ public class Order {
 
     public boolean belongsTo(String customerId) {
         return this.customerId.equals(customerId);
+    }
+
+    public List<ItemGroup> getItemGroupsShippingOn(LocalDate date) {
+        return itemGroups.stream()
+                .filter(itemGroup -> itemGroup.getShippingDate().equals(date))
+                .toList();
     }
 }
