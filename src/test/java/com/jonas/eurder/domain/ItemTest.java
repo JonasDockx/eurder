@@ -106,4 +106,26 @@ class ItemTest {
         assertThat(item.getName()).isEqualTo("Book A");
         assertThat(item.getPrice()).isEqualByComparingTo("14.99");
     }
+
+    @Test
+    void getUrgencyLevel_givenSixUnitsInStock_thenReturnsStockMedium() {
+        Item item = new Item("Book A", "A long book", new BigDecimal("14.99"), 6);
+
+        assertThat(item.getUrgencyLevel()).isEqualByComparingTo(UrgencyLevel.STOCK_MEDIUM);
+    }
+
+    @Test
+    void getUrgencyLevel_givenNegativeFiveUnitsInStock_thenReturnsStockLow() {
+        Item item = new Item("Book A", "A long book", new BigDecimal("14.99"), 1);
+        item.decreaseStock(7);
+
+        assertThat(item.getUrgencyLevel()).isEqualByComparingTo(UrgencyLevel.STOCK_LOW);
+    }
+
+    @Test
+    void getUrgencyLevel_givenTwentyUnitsInStock_thenReturnsStockHigh() {
+        Item item = new Item("Book A", "A long book", new BigDecimal("14.99"), 20);
+
+        assertThat(item.getUrgencyLevel()).isEqualByComparingTo(UrgencyLevel.STOCK_HIGH);
+    }
 }

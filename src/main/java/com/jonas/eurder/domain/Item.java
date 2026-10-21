@@ -55,4 +55,8 @@ public class Item {
         this.price = validatedPrice;
         this.amount = validatedAmount;
     }
+
+    public UrgencyLevel getUrgencyLevel() {
+        return UrgencyLevel.fromStock(amount);
+    }
 }
