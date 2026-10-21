@@ -35,8 +35,8 @@ public class OrderService {
         this.itemRepository = itemRepository;
     }
 
-    public OrderDTO placeOrder(CreateOrderDTO dto) {
-        Customer customer = findCustomer(dto.customerId());
+    public OrderDTO placeOrder(String customerId, CreateOrderDTO dto) {
+        Customer customer = findCustomer(customerId);
         Order order = createOrder(customer, dto.itemGroups());
         logger.info("Order {} placed by customer {}", order.getId(), customer.getId());
         return orderMapper.toDTO(order);

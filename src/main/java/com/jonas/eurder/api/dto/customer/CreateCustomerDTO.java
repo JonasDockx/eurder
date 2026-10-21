@@ -9,6 +9,7 @@ public record CreateCustomerDTO(
         @NotBlank String firstName,
         @NotBlank String lastName,
         @NotBlank @Email String email,
+        @NotBlank String password,
         @NotNull AddressDTO address,
         @NotBlank String phoneNumber
 ) {

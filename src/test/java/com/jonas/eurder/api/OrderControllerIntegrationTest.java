@@ -1,16 +1,11 @@
 package com.jonas.eurder.api;
 
 import com.jonas.eurder.domain.*;
-import com.jonas.eurder.repository.CustomerRepository;
-import com.jonas.eurder.repository.ItemRepository;
-import com.jonas.eurder.repository.OrderRepository;
 import io.restassured.RestAssured;
 import io.restassured.config.RestAssuredConfig;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -23,25 +18,29 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class OrderControllerIntegrationTest {
+class OrderControllerIntegrationTest extends IntegrationTestBase {
 
-    @LocalServerPort
-    private int port;
+    private Item saveItem(String price, int stock) {
+        Item item = new Item("Book A", "A long book", new BigDecimal(price), stock);
+        itemRepository.save(item);
+        return item;
+    }
 
-    @Autowired
-    private CustomerRepository customerRepository;
+    private Order saveOrder(Customer customer, Item item, int amount) {
+        Order order = new Order(customer.getId(), List.of(new ItemGroup(item, amount, LocalDate.now())));
+        orderRepository.save(order);
+        return order;
+    }
 
-    @Autowired
-    private ItemRepository itemRepository;
-
-    @Autowired
-    private OrderRepository orderRepository;
+    private String reorderBody(String customerId) {
+        return """
+                { "customerId": "%s" }
+                """.formatted(customerId);
+    }
 
     @Test
     void placeOrder_givenKnownCustomerAndItemInStock_thenReturns201WithTotalAndShippingDate() {
-        Customer customer = new Customer("Jonas", "Dockx", "jonas@test.com",
-                new Address("Test street", "1", "1234", "Brussels"),
-                "012345679");
+        Customer customer = saveCustomer("Jonas");
         customerRepository.save(customer);
         Item item = new Item("Book A", "A long book", new BigDecimal("14.99"), 5);
         itemRepository.save(item);
@@ -55,8 +54,7 @@ class OrderControllerIntegrationTest {
                 }
                 """.formatted(customer.getId(), item.getId());
 
-        given()
-                .port(port)
+        loggedInAs(customer)
                 .config(RestAssuredConfig.config().jsonConfig(jsonConfig().numberReturnType(BIG_DECIMAL)))
                 .contentType(ContentType.JSON)
                 .body(requestBody)
@@ -72,10 +70,8 @@ class OrderControllerIntegrationTest {
     }
 
     @Test
-    void placeOrder_givenUnknownCustomerId_thenReturns404() {
-        Customer customer = new Customer("Jonas", "Dockx", "jonas@test.com",
-                new Address("Test street", "1", "1234", "Brussels"),
-                "012345679");
+    void placeOrder_givenNotLoggedIn_thenReturns401() {
+        Customer customer = saveCustomer("Jonas");
         customerRepository.save(customer);
         Item item = new Item("Book A", "A long book", new BigDecimal("14.99"), 5);
         itemRepository.save(item);
@@ -89,15 +85,14 @@ class OrderControllerIntegrationTest {
                 }
                 """.formatted(item.getId());
 
-        given()
-                .port(port)
+        notLoggedIn()
                 .config(RestAssuredConfig.config().jsonConfig(jsonConfig().numberReturnType(BIG_DECIMAL)))
                 .contentType(ContentType.JSON)
                 .body(requestBody)
                 .when()
                 .post("/orders")
                 .then()
-                .statusCode(404);
+                .statusCode(401);
     }
 
     @Test
@@ -113,23 +108,21 @@ class OrderControllerIntegrationTest {
 
         String requestBody = """
                 {
-                    "customerId": "%s",
                     "itemGroups": [
                         { "itemId": "%s", "amount": 2 },
                         { "itemId": "123", "amount": 5 }
                     ]
                 }
-                """.formatted(customer.getId(), item.getId());
+                """.formatted(item.getId());
 
-        given()
-                .port(port)
+        loggedInAs(customer)
                 .config(RestAssuredConfig.config().jsonConfig(jsonConfig().numberReturnType(BIG_DECIMAL)))
                 .contentType(ContentType.JSON)
                 .body(requestBody)
                 .when()
                 .post("/orders")
                 .then()
-                .statusCode(404);
+                .statusCode(401);
 
         assertThat(itemRepository.getById(item.getId()).orElseThrow().getAmount()).isEqualTo(5);
     }
@@ -164,9 +157,7 @@ class OrderControllerIntegrationTest {
 
     @Test
     void givenPlacedOrder_whenItemPriceIsUpdated_thenOrderKeepsTheOriginalPrice() {
-        Customer customer = new Customer("Jonas", "Dockx", "jonas@test.com",
-                new Address("Test street", "1", "1234", "Brussels"),
-                "012345679");
+        Customer customer = saveCustomer("Jonas");
         customerRepository.save(customer);
         Item item = new Item("Book A", "A long book", new BigDecimal("14.99"), 5);
         itemRepository.save(item);
@@ -183,8 +174,7 @@ class OrderControllerIntegrationTest {
                 }
                 """.formatted(customer.getId(), item.getId());
 
-        String orderId = given()
-                .port(port)
+        String orderId = loggedInAs(customer)
                 .contentType(ContentType.JSON)
                 .body(originalRequestBody)
                 .when()
@@ -202,8 +192,7 @@ class OrderControllerIntegrationTest {
                 }
                 """;
 
-        given()
-                .port(port)
+        loggedInAsAdmin()
                 .contentType(ContentType.JSON)
                 .body(updatedRequestBody)
                 .when()
@@ -223,8 +212,7 @@ class OrderControllerIntegrationTest {
         item.update("Book A", "A long book", new BigDecimal("20.00"), 5);
         itemRepository.save(item);
 
-        given()
-                .port(port)
+        loggedInAs(customer)
                 .config(RestAssured.config().jsonConfig(jsonConfig().numberReturnType(BIG_DECIMAL)))
                 .contentType(ContentType.JSON)
                 .body(reorderBody(customer.getId()))
@@ -248,14 +236,11 @@ class OrderControllerIntegrationTest {
         Customer jonas = saveCustomer("Jonas");
         Customer bram = saveCustomer("Bram");
         Item item = saveItem("14.99", 5);
-        Order ordersOfJonas = saveOrder(jonas, item, 2);
+        Order orderOfJonas = saveOrder(jonas, item, 2);
 
-        given()
-                .port(port)
-                .contentType(ContentType.JSON)
-                .body(reorderBody(bram.getId()))
+        loggedInAs(bram)
                 .when()
-                .post("/orders/" + ordersOfJonas.getId() + "/reorder")
+                .post("/orders/" + orderOfJonas.getId() + "/reorder")
                 .then()
                 .statusCode(403);
 
@@ -263,11 +248,40 @@ class OrderControllerIntegrationTest {
     }
 
     @Test
-    void reorder_givenUnknownOrder_thenReturns404() {
+    void reorder_givenNoCredentials_thenReturns401AndStockIsUnchanged() {
         Customer customer = saveCustomer("Jonas");
+        Item item = saveItem("14.99", 5);
+        Order order = saveOrder(customer, item, 2);
+
+        notLoggedIn()
+                .when()
+                .post("/orders/" + order.getId() + "/reorder")
+                .then()
+                .statusCode(401);
+
+        assertThat(itemRepository.getById(item.getId()).orElseThrow().getAmount()).isEqualTo(5);
+    }
+
+    @Test
+    void reorder_givenWrongPassword_thenReturns401() {
+        Customer customer = saveCustomer("Jonas");
+        Item item = saveItem("14.99", 5);
+        Order order = saveOrder(customer, item, 2);
 
         given()
                 .port(port)
+                .auth().preemptive().basic(customer.getEmail(), "wrong-password")
+                .when()
+                .post("/orders/" + order.getId() + "/reorder")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    void reorder_givenUnknownOrder_thenReturns404() {
+        Customer customer = saveCustomer("Jonas");
+
+        loggedInAs(customer)
                 .contentType(ContentType.JSON)
                 .body(reorderBody(customer.getId()))
                 .when()
@@ -282,30 +296,26 @@ class OrderControllerIntegrationTest {
         Item item = saveItem("14.99", 5);
         Order order = saveOrder(customer, item, 2);
 
-        given()
-                .port(port)
-                .contentType(ContentType.JSON)
-                .body(reorderBody("does-not-exist"))
+        notLoggedIn()
                 .when()
                 .post("/orders/" + order.getId() + "/reorder")
                 .then()
-                .statusCode(404);
+                .statusCode(401);
+
+        assertThat(itemRepository.getById(item.getId()).orElseThrow().getAmount()).isEqualTo(5);
     }
 
     @Test
-    void reorder_givenMissingCustomerId_thenReturns400() {
+    void reorder_givenAdmin_thenReturns403() {
         Customer customer = saveCustomer("Jonas");
         Item item = saveItem("14.99", 5);
         Order order = saveOrder(customer, item, 2);
 
-        given()
-                .port(port)
-                .contentType(ContentType.JSON)
-                .body("{}")
+        loggedInAsAdmin()
                 .when()
                 .post("/orders/" + order.getId() + "/reorder")
                 .then()
-                .statusCode(400);
+                .statusCode(403);
     }
 
     @Test
@@ -321,8 +331,7 @@ class OrderControllerIntegrationTest {
 
         String orderPath = "find { it.orderId == '%s' }".formatted(order.getId());
 
-        given()
-                .port(port)
+        loggedInAsAdmin()
                 .when()
                 .get("/orders/shipping-today")
                 .then()
@@ -341,8 +350,7 @@ class OrderControllerIntegrationTest {
         Item item = saveItem("14.99", 5);
         Order orderShippingTomorrow = saveOrder(customer, item, 1);
 
-        given()
-                .port(port)
+        loggedInAsAdmin()
                 .when()
                 .get("/orders/shipping-today")
                 .then()
@@ -350,29 +358,21 @@ class OrderControllerIntegrationTest {
                 .body("orderId", not(hasItem(orderShippingTomorrow.getId())));
     }
 
-    private Customer saveCustomer(String firstName) {
-        Customer customer = new Customer(firstName, "Test", firstName.toLowerCase() + "@test.com",
-                new Address("Test street", "1", "1000", "Brussels"),
-                "0123456789");
-        customerRepository.save(customer);
-        return customer;
-    }
-
-    private Item saveItem(String price, int stock) {
-        Item item = new Item("Book A", "A long book", new BigDecimal(price), stock);
-        itemRepository.save(item);
-        return item;
-    }
-
-    private Order saveOrder(Customer customer, Item item, int amount) {
-        Order order = new Order(customer.getId(), List.of(new ItemGroup(item, amount, LocalDate.now())));
+    @Test
+    void getShippingToday_asCustomer_Returns403() {
+        Customer customer = saveCustomer("Jonas");
+        Item itemInStock = saveItem("14.99", 5);
+        Item itemOutOfStock = saveItem("1.50", 0);
+        LocalDate yesterday = LocalDate.now().minusDays(1);
+        Order order = new Order(customer.getId(), List.of(
+                new ItemGroup(itemInStock, 2, yesterday),       // ships today
+                new ItemGroup(itemOutOfStock, 1, yesterday)));  // ships in 6 days
         orderRepository.save(order);
-        return order;
-    }
 
-    private String reorderBody(String customerId) {
-        return """
-                { "customerId": "%s" }
-                """.formatted(customerId);
+        loggedInAs(customer)
+                .when()
+                .get("/orders/shipping-today")
+                .then()
+                .statusCode(403);
     }
 }

@@ -2,11 +2,13 @@ package com.jonas.eurder.api;
 
 import com.jonas.eurder.service.exception.ForbiddenException;
 import com.jonas.eurder.service.exception.NotFoundException;
+import com.jonas.eurder.service.exception.UnauthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -49,6 +51,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exception.getMessage());
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<String> handleUnauthorized(UnauthorizedException exception) {
+        logger.warn("Unauthorized: {}", exception.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(exception.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<String> handleTypeMismatch(MethodArgumentTypeMismatchException exception) {
         logger.warn("Invalid value '{}' for parameter '{}'", exception.getValue(), exception.getName());
@@ -58,6 +66,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleUnexpected(Exception exception) {
+        if (exception instanceof ErrorResponse errorResponse) {
+            logger.warn("Request rejected: {}", exception.getMessage());
+            return ResponseEntity.status(errorResponse.getStatusCode()).body(exception.getMessage());
+        }
         logger.error("Unexpected error", exception);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong.");
     }

@@ -4,7 +4,10 @@ import com.jonas.eurder.api.dto.customer.CreateCustomerDTO;
 import com.jonas.eurder.api.dto.customer.CustomerDTO;
 import com.jonas.eurder.api.dto.customer.CustomerMapper;
 import com.jonas.eurder.domain.Customer;
+import com.jonas.eurder.domain.Role;
+import com.jonas.eurder.domain.User;
 import com.jonas.eurder.repository.CustomerRepository;
+import com.jonas.eurder.repository.UserRepository;
 import com.jonas.eurder.service.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,15 +22,18 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
+    private final UserRepository userRepository;
 
-    public CustomerService(CustomerRepository customerRepository, CustomerMapper customerMapper) {
+    public CustomerService(CustomerRepository customerRepository, CustomerMapper customerMapper, UserRepository userRepository) {
         this.customerRepository = customerRepository;
         this.customerMapper = customerMapper;
+        this.userRepository = userRepository;
     }
 
     public CustomerDTO createCustomer(CreateCustomerDTO dto) {
         Customer customer = customerMapper.toCustomer(dto);
         customerRepository.save(customer);
+        userRepository.save(new User(dto.email(), dto.password(), Role.CUSTOMER, customer.getId()));
         logger.info("Customer created with id {}", customer.getId());
         return customerMapper.toDTO(customer);
     }
