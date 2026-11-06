@@ -2,6 +2,8 @@ package com.jonas.eurder.domain;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "app_user")
 public class User {
@@ -37,5 +39,16 @@ public class User {
 
     public boolean passwordMatches(String password) {
         return this.password.equals(password);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof User user)) return false;
+        return Objects.equals(email, user.getEmail());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(email);
     }
 }

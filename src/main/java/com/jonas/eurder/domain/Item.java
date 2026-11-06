@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 import java.util.UUID;
 
 import static com.jonas.eurder.domain.Validation.*;
@@ -66,5 +67,16 @@ public class Item {
 
     public UrgencyLevel getUrgencyLevel() {
         return UrgencyLevel.fromStock(amount);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Item item)) return false;
+        return Objects.equals(id, item.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

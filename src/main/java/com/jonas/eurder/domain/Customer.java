@@ -4,6 +4,7 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import static com.jonas.eurder.domain.Validation.validateNotBlank;
@@ -54,5 +55,16 @@ public class Customer {
 
     public String getPhoneNumber() {
         return phoneNumber;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Customer customer)) return false;
+        return Objects.equals(id, customer.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

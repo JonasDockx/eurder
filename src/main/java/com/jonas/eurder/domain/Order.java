@@ -4,10 +4,7 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static com.jonas.eurder.domain.Validation.validateNotBlank;
 import static com.jonas.eurder.domain.Validation.validateNotEmpty;
@@ -58,5 +55,16 @@ public class Order {
         return itemGroups.stream()
                 .filter(itemGroup -> itemGroup.getShippingDate().equals(date))
                 .toList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Order order)) return false;
+        return Objects.equals(id, order.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }
