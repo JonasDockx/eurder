@@ -1,17 +1,23 @@
 package com.jonas.eurder.domain;
 
+import jakarta.persistence.Embeddable;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static com.jonas.eurder.domain.Validation.validatePositive;
 
+@Embeddable
 public class ItemGroup {
 
-    private final String itemId;
-    private final String itemName;
-    private final BigDecimal unitPrice;
-    private final int amount;
-    private final LocalDate shippingDate;
+    private String itemId;
+    private String itemName;
+    private BigDecimal unitPrice;
+    private int amount;
+    private LocalDate shippingDate;
+
+    protected ItemGroup() {
+    }
 
     public ItemGroup(Item item, int amount, LocalDate orderDate) {
         this.itemId = item.getId();

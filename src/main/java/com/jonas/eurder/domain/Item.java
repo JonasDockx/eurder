@@ -1,16 +1,24 @@
 package com.jonas.eurder.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
 import java.math.BigDecimal;
 import java.util.UUID;
 
 import static com.jonas.eurder.domain.Validation.*;
 
+@Entity
 public class Item {
-    private final String id;
+    @Id
+    private String id;
     private String name;
     private String description;
     private BigDecimal price;
     private int amount;
+
+    protected Item() {
+    }
 
     public Item(String name, String description, BigDecimal price, int amount) {
         this.id = UUID.randomUUID().toString();

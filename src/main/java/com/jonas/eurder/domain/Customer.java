@@ -1,17 +1,27 @@
 package com.jonas.eurder.domain;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
 import java.util.UUID;
 
 import static com.jonas.eurder.domain.Validation.validateNotBlank;
 import static com.jonas.eurder.domain.Validation.validateNotNull;
 
+@Entity
 public class Customer {
-    private final String id;
-    private final String firstName;
-    private final String lastName;
-    private final String email;
-    private final Address address;
-    private final String phoneNumber;
+    @Id
+    private String id;
+    private String firstName;
+    private String lastName;
+    private String email;
+    @Embedded
+    private Address address;
+    private String phoneNumber;
+
+    protected Customer() {
+    }
 
     public Customer(String firstName, String lastName, String email, Address address, String phoneNumber) {
         this.id = UUID.randomUUID().toString();

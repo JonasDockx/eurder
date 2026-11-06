@@ -1,22 +1,35 @@
 package com.jonas.eurder.domain;
 
+import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import static com.jonas.eurder.domain.Validation.validateNotBlank;
 import static com.jonas.eurder.domain.Validation.validateNotEmpty;
 
+@Entity
+@Table(name = "eurder")
 public class Order {
-    private final String id;
-    private final String customerId;
-    private final List<ItemGroup> itemGroups;
+    @Id
+    private String id;
+    private String customerId;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "item_group", joinColumns = @JoinColumn(name = "eurder_id"))
+    private List<ItemGroup> itemGroups = new ArrayList<>();
+
+    protected Order() {
+    }
 
     public Order(String customerId, List<ItemGroup> itemGroups) {
         this.id = UUID.randomUUID().toString();
         this.customerId = validateNotBlank(customerId, "Customer Id");
-        this.itemGroups = List.copyOf(validateNotEmpty(itemGroups, "Item groups"));
+        this.itemGroups = new ArrayList<>(validateNotEmpty(itemGroups, "Item groups"));
     }
 
     public String getId() {
@@ -28,7 +41,7 @@ public class Order {
     }
 
     public List<ItemGroup> getItemGroups() {
-        return itemGroups;
+        return Collections.unmodifiableList(itemGroups);
     }
 
     public BigDecimal getTotalPrice() {
