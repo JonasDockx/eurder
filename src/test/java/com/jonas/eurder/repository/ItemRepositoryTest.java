@@ -2,21 +2,33 @@ package com.jonas.eurder.repository;
 
 import com.jonas.eurder.domain.Item;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 
 import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@DataJpaTest
 class ItemRepositoryTest {
 
-    private final Item item = new Item("Laptop", "A Leovo Laptop", new BigDecimal("2999.99"), 5);
+    @Autowired
+    private ItemRepository itemRepository;
 
-    private final ItemRepository itemRepository = new ItemRepository();
+    @Autowired
+    private TestEntityManager entityManager;
+
+    private final Item item = new Item("Laptop", "A Lenovo Laptop", new BigDecimal("2999.99"), 5);
 
     @Test
-    void givenSaveItem_whenGetById_thenShouldReturnTheSameItem() {
+    void givenSaveItem_whenFindById_thenShouldReturnTheSameItem() {
         itemRepository.save(item);
+        entityManager.flush();
+        entityManager.clear();
 
-        assertThat(itemRepository.getById(item.getId())).contains(item);
+        Item found = itemRepository.findById(item.getId()).orElseThrow();
+
+        assertThat(found).isEqualTo(item);
     }
 }

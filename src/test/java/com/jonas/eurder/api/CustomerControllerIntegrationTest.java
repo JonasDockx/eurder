@@ -199,4 +199,24 @@ class CustomerControllerIntegrationTest extends IntegrationTestBase {
                 .then()
                 .statusCode(401);
     }
+
+    @Test
+    void createCustomer_givenEmailThatIsAlreadyRegistered_thenReturns409() {
+        String email = uniqueEmail("jonas");
+        notLoggedIn()
+                .contentType(ContentType.JSON)
+                .body(registrationBody(email))
+                .when()
+                .post("/customers")
+                .then()
+                .statusCode(201);
+
+        notLoggedIn()
+                .contentType(ContentType.JSON)
+                .body(registrationBody(email))
+                .when()
+                .post("/customers")
+                .then()
+                .statusCode(409);
+    }
 }

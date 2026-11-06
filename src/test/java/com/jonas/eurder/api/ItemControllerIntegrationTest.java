@@ -100,7 +100,7 @@ class ItemControllerIntegrationTest extends IntegrationTestBase {
                 .body("name", equalTo("Book B"))
                 .body("amount", equalTo(10));
 
-        assertThat(itemRepository.getById(item.getId()).orElseThrow().getPrice()).isEqualByComparingTo("9.99");
+        assertThat(itemRepository.findById(item.getId()).orElseThrow().getPrice()).isEqualByComparingTo("9.99");
     }
 
     @Test

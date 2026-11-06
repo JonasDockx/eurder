@@ -2,11 +2,11 @@ package com.jonas.eurder.repository;
 
 import com.jonas.eurder.domain.Address;
 import com.jonas.eurder.domain.Customer;
-import com.jonas.eurder.service.exception.EmailAlreadyExistsException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -24,37 +24,28 @@ class CustomerRepositoryTest {
     private final Customer customer = new Customer("Jonas", "Dockx", "jonas@test.com", address, "0123456789");
 
     @Test
-    void givenSavedCustomer_whenGetById_thenShouldReturnTheSameCustomer() {
+    void givenSavedCustomer_whenFindById_thenShouldReturnTheSameCustomer() {
         customerRepository.save(customer);
         entityManager.flush();
         entityManager.clear();
 
         Customer found = customerRepository.findById(customer.getId()).orElseThrow();
 
-        assertThat(found).isEqualTo(customer);
+        assertThat(found).usingRecursiveComparison().isEqualTo(customer);
     }
 
     @Test
-    void givenNoCustomers_whenGetAll_thenReturnsEmptyList() {
+    void givenNoCustomers_whenFindAll_thenReturnsEmptyList() {
         assertThat(customerRepository.findAll()).isEmpty();
     }
 
     @Test
-    void givenSavedCustomers_whenGetALL_thenReturnsAllOfThem() {
+    void givenSavedCustomers_whenFindAll_thenReturnsAllOfThem() {
         Customer otherCustomer = new Customer("Jos", "De Vos", "jos@test.com", address, "0987654321");
         customerRepository.save(customer);
         customerRepository.save(otherCustomer);
 
         assertThat(customerRepository.findAll()).containsExactlyInAnyOrder(customer, otherCustomer);
-    }
-
-    @Test
-    void getAll_returnsACopyThatCannotChangeTheRepository() {
-        customerRepository.save(customer);
-
-        assertThatThrownBy(() -> customerRepository.findAll().clear())
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThat(customerRepository.findAll()).hasSize(1);
     }
 
     @Test
@@ -80,6 +71,6 @@ class CustomerRepositoryTest {
         Customer duplicate = new Customer("Other", "Person", "jonas@test.com", address, "0111111111");
 
         assertThatThrownBy(() -> customerRepository.saveAndFlush(duplicate))
-                .isInstanceOf(EmailAlreadyExistsException.class);
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 }

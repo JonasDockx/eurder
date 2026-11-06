@@ -1,6 +1,9 @@
 package com.jonas.eurder.api;
 
-import com.jonas.eurder.domain.*;
+import com.jonas.eurder.domain.Customer;
+import com.jonas.eurder.domain.Item;
+import com.jonas.eurder.domain.ItemGroup;
+import com.jonas.eurder.domain.Order;
 import io.restassured.RestAssured;
 import io.restassured.config.RestAssuredConfig;
 import io.restassured.http.ContentType;
@@ -41,7 +44,6 @@ class OrderControllerIntegrationTest extends IntegrationTestBase {
     @Test
     void placeOrder_givenKnownCustomerAndItemInStock_thenReturns201WithTotalAndShippingDate() {
         Customer customer = saveCustomer("Jonas");
-        customerRepository.save(customer);
         Item item = new Item("Book A", "A long book", new BigDecimal("14.99"), 5);
         itemRepository.save(item);
 
@@ -66,13 +68,12 @@ class OrderControllerIntegrationTest extends IntegrationTestBase {
                 .body("totalPrice", comparesEqualTo(new BigDecimal("29.98")))
                 .body("itemGroups[0].shippingDate", equalTo(LocalDate.now().plusDays(1).toString()));
 
-        assertThat(itemRepository.getById(item.getId()).orElseThrow().getAmount()).isEqualTo(3);
+        assertThat(itemRepository.findById(item.getId()).orElseThrow().getAmount()).isEqualTo(3);
     }
 
     @Test
     void placeOrder_givenNotLoggedIn_thenReturns401() {
         Customer customer = saveCustomer("Jonas");
-        customerRepository.save(customer);
         Item item = new Item("Book A", "A long book", new BigDecimal("14.99"), 5);
         itemRepository.save(item);
 
@@ -97,10 +98,7 @@ class OrderControllerIntegrationTest extends IntegrationTestBase {
 
     @Test
     void placeOrder_givenKnownCustomerAndNonExistentItem_thenReturns404AndStockIsUnchanged() {
-        Customer customer = new Customer("Jonas", "Dockx", "jonas@test.com",
-                new Address("Test street", "1", "1234", "Brussels"),
-                "012345679");
-        customerRepository.save(customer);
+        Customer customer = saveCustomer("Jonas");
         Item item = new Item("Book A", "A long book", new BigDecimal("14.99"), 5);
         Item otherItem = new Item("Pen", "A blue pen", new BigDecimal("1.49"), 10);
         itemRepository.save(item);
@@ -122,17 +120,14 @@ class OrderControllerIntegrationTest extends IntegrationTestBase {
                 .when()
                 .post("/orders")
                 .then()
-                .statusCode(401);
+                .statusCode(404);
 
-        assertThat(itemRepository.getById(item.getId()).orElseThrow().getAmount()).isEqualTo(5);
+        assertThat(itemRepository.findById(item.getId()).orElseThrow().getAmount()).isEqualTo(5);
     }
 
     @Test
     void placeOrder_givenEmptyItemGroupsList_thenReturns400() {
-        Customer customer = new Customer("Jonas", "Dockx", "jonas@test.com",
-                new Address("Test street", "1", "1234", "Brussels"),
-                "012345679");
-        customerRepository.save(customer);
+        Customer customer = saveCustomer("Jonas");
         Item item = new Item("Book A", "A long book", new BigDecimal("14.99"), 5);
         itemRepository.save(item);
 
@@ -158,7 +153,6 @@ class OrderControllerIntegrationTest extends IntegrationTestBase {
     @Test
     void givenPlacedOrder_whenItemPriceIsUpdated_thenOrderKeepsTheOriginalPrice() {
         Customer customer = saveCustomer("Jonas");
-        customerRepository.save(customer);
         Item item = new Item("Book A", "A long book", new BigDecimal("14.99"), 5);
         itemRepository.save(item);
 
@@ -200,7 +194,7 @@ class OrderControllerIntegrationTest extends IntegrationTestBase {
                 .then()
                 .statusCode(200);
 
-        assertThat(orderRepository.getById(orderId).orElseThrow().getTotalPrice()).isEqualByComparingTo("29.98");
+        assertThat(orderRepository.findById(orderId).orElseThrow().getTotalPrice()).isEqualByComparingTo("29.98");
     }
 
     @Test
@@ -226,9 +220,9 @@ class OrderControllerIntegrationTest extends IntegrationTestBase {
                 .body("itemGroups[0].amount", equalTo(2))
                 .body("totalPrice", comparesEqualTo(new BigDecimal("40.00")));
 
-        assertThat(orderRepository.getById(originalOrder.getId()).orElseThrow().getTotalPrice())
+        assertThat(orderRepository.findById(originalOrder.getId()).orElseThrow().getTotalPrice())
                 .isEqualByComparingTo("29.98");
-        assertThat(itemRepository.getById(item.getId()).orElseThrow().getAmount()).isEqualTo(3);
+        assertThat(itemRepository.findById(item.getId()).orElseThrow().getAmount()).isEqualTo(3);
     }
 
     @Test
@@ -244,7 +238,7 @@ class OrderControllerIntegrationTest extends IntegrationTestBase {
                 .then()
                 .statusCode(403);
 
-        assertThat(itemRepository.getById(item.getId()).orElseThrow().getAmount()).isEqualTo(5);
+        assertThat(itemRepository.findById(item.getId()).orElseThrow().getAmount()).isEqualTo(5);
     }
 
     @Test
@@ -259,7 +253,7 @@ class OrderControllerIntegrationTest extends IntegrationTestBase {
                 .then()
                 .statusCode(401);
 
-        assertThat(itemRepository.getById(item.getId()).orElseThrow().getAmount()).isEqualTo(5);
+        assertThat(itemRepository.findById(item.getId()).orElseThrow().getAmount()).isEqualTo(5);
     }
 
     @Test
@@ -302,7 +296,7 @@ class OrderControllerIntegrationTest extends IntegrationTestBase {
                 .then()
                 .statusCode(401);
 
-        assertThat(itemRepository.getById(item.getId()).orElseThrow().getAmount()).isEqualTo(5);
+        assertThat(itemRepository.findById(item.getId()).orElseThrow().getAmount()).isEqualTo(5);
     }
 
     @Test

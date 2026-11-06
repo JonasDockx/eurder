@@ -1,62 +1,94 @@
 package com.jonas.eurder.repository;
 
-import com.jonas.eurder.domain.Item;
-import com.jonas.eurder.domain.ItemGroup;
-import com.jonas.eurder.domain.Order;
+import com.jonas.eurder.domain.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@DataJpaTest
 class OrderRepositoryTest {
+
     private static final LocalDate ORDER_DATE = LocalDate.of(2026, 10, 20);
+    private static final Address ADDRESS = new Address("Test Street", "1", "1000", "Brussels");
 
-    private final OrderRepository orderRepository = new OrderRepository();
+    @Autowired
+    private OrderRepository orderRepository;
 
-    private final Item book = new Item("Book A", "A long book", new BigDecimal("14.99"), 5);
-    private final Item pen = new Item("Pen", "A blue pen", new BigDecimal("1.50"), 10);
-    private final List<ItemGroup> itemGroups = List.of(
-            new ItemGroup(book, 2, ORDER_DATE),
-            new ItemGroup(pen, 4, ORDER_DATE));
-    private final Order order = new Order("customer-id", itemGroups);
+    @Autowired
+    private CustomerRepository customerRepository;
 
-    @Test
-    void givenSavedOrder_whenGetById_thenShouldReturnTheSameOrder() {
-        orderRepository.save(order);
+    @Autowired
+    private ItemRepository itemRepository;
 
-        assertThat(orderRepository.getById(order.getId())).contains(order);
+    @Autowired
+    private TestEntityManager entityManager;
+
+    private Customer jonas;
+    private Customer bram;
+    private Item book;
+    private Item pen;
+
+    @BeforeEach
+    void setUp() {
+        jonas = customerRepository.save(new Customer("Jonas", "Dockx", "jonas@test.com", ADDRESS, "0123456789"));
+        bram = customerRepository.save(new Customer("Bram", "Test", "bram@test.com", ADDRESS, "0987654321"));
+        book = itemRepository.save(new Item("Book A", "A long book", new BigDecimal("14.99"), 5));
+        pen = itemRepository.save(new Item("Pen", "A blue pen", new BigDecimal("1.50"), 10));
     }
 
     @Test
-    void getByCustomerId_returnsOnlyThatCustomersOrders() {
-        Order ordersOfJonas1 = new Order("jonas-id", List.of(new ItemGroup(book, 1, ORDER_DATE)));
-        Order ordersOfJonas2 = new Order("jonas-id", List.of(new ItemGroup(book, 2, ORDER_DATE)));
-        Order orderOfBram = new Order("bram-id", List.of(new ItemGroup(book, 3, ORDER_DATE)));
-        orderRepository.save(ordersOfJonas1);
-        orderRepository.save(ordersOfJonas2);
-        orderRepository.save(orderOfBram);
+    void givenSavedOrder_whenFindById_thenShouldReturnTheSameOrder() {
+        Order order = new Order(jonas.getId(), List.of(
+                new ItemGroup(book, 2, ORDER_DATE),
+                new ItemGroup(pen, 4, ORDER_DATE)
+        ));
+        orderRepository.save(order);
+        entityManager.flush();
+        entityManager.clear();
 
-        assertThat(orderRepository.getByCustomerId("jonas-id"))
+        Order found = orderRepository.findById(order.getId()).orElseThrow();
+
+        assertThat(found.getCustomerId()).isEqualTo(jonas.getId());
+        assertThat(found.getItemGroups())
+                .usingRecursiveFieldByFieldElementComparator()
+                .containsExactlyInAnyOrderElementsOf(order.getItemGroups());
+        assertThat(found.getTotalPrice()).isEqualByComparingTo("35.98");
+    }
+
+
+    @Test
+    void findByCustomerId_returnsOnlyThatCustomersOrders() {
+        Order ordersOfJonas1 = orderRepository.save(new Order(jonas.getId(), List.of(new ItemGroup(book, 1, ORDER_DATE))));
+        Order ordersOfJonas2 = orderRepository.save(new Order(jonas.getId(), List.of(new ItemGroup(book, 2, ORDER_DATE))));
+        orderRepository.save(new Order(bram.getId(), List.of(new ItemGroup(book, 3, ORDER_DATE))));
+
+        assertThat(orderRepository.findByCustomerId(jonas.getId()))
                 .containsExactlyInAnyOrder(ordersOfJonas1, ordersOfJonas2);
     }
 
     @Test
-    void getByCustomerId_givenCustomerWithoutOrders_returnsEmptyList() {
-        orderRepository.save(new Order("bram-id", List.of(new ItemGroup(book, 1, ORDER_DATE))));
+    void findByCustomerId_givenCustomerWithoutOrders_returnsEmptyList() {
+        orderRepository.save(new Order(bram.getId(), List.of(new ItemGroup(book, 1, ORDER_DATE))));
 
-        assertThat(orderRepository.getByCustomerId("jonas-id")).isEmpty();
+        assertThat(orderRepository.findByCustomerId(jonas.getId())).isEmpty();
     }
 
     @Test
-    void givenSavedOrders_whenGetAll_thenReturnsAllOfThem() {
-        Order otherOrder = new Order("bram-id", List.of(new ItemGroup(book, 1, ORDER_DATE)));
-        orderRepository.save(order);
-        orderRepository.save(otherOrder);
+    void givenOrderForUnknownCustomer_whenSaving_thenDatabaseRefusesIt() {
+        Order order = new Order("unknown-customer", List.of(new ItemGroup(book, 1, ORDER_DATE)));
 
-        assertThat(orderRepository.getAll()).containsExactlyInAnyOrder(order, otherOrder);
+        assertThatThrownBy(() -> orderRepository.saveAndFlush(order))
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 
 }
