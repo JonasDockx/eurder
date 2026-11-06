@@ -73,7 +73,7 @@ class OrderControllerIntegrationTest extends IntegrationTestBase {
 
     @Test
     void placeOrder_givenNotLoggedIn_thenReturns401() {
-        Customer customer = saveCustomer("Jonas");
+        saveCustomer("Jonas");
         Item item = new Item("Book A", "A long book", new BigDecimal("14.99"), 5);
         itemRepository.save(item);
 
