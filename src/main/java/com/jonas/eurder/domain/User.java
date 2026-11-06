@@ -1,10 +1,20 @@
 package com.jonas.eurder.domain;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "app_user")
 public class User {
-    private final String email;
-    private final String password;
-    private final Role role;
-    private final String customerId;
+
+    @Id
+    private String email;
+    private String password;
+    @Enumerated(EnumType.STRING)
+    private Role role;
+    private String customerId;
+
+    protected User() {
+    }
 
     public User(String email, String password, Role role, String customerId) {
         this.email = email;
