@@ -8,11 +8,13 @@ import com.jonas.eurder.service.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
 
 @Service
+@Transactional
 public class ItemService {
 
     private static final Logger logger = LoggerFactory.getLogger(ItemService.class);
@@ -33,7 +35,7 @@ public class ItemService {
     }
 
     public ItemDTO updateItem(String id, UpdateItemDTO dto) {
-        Item item = itemRepository.getById(id)
+        Item item = itemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Item with id " + id + " could not be found"));
         item.update(dto.name(), dto.description(), dto.price(), dto.amount());
         itemRepository.save(item);
@@ -41,9 +43,10 @@ public class ItemService {
         return itemMapper.toDTO(item);
     }
 
+    @Transactional(readOnly = true)
     public List<ItemWithStockLevelDTO> getItemsWithStockLevels(UrgencyLevel urgencyLevel) {
         logger.info("Fetching items with stock levels, filter: {}", urgencyLevel);
-        return itemRepository.getAll().stream()
+        return itemRepository.findAll().stream()
                 .filter(item -> urgencyLevel == null || item.getUrgencyLevel() == urgencyLevel)
                 .sorted(Comparator.comparing(Item::getUrgencyLevel))
                 .map(itemMapper::toItemWithStockLevelDTO)

@@ -9,6 +9,8 @@ import com.jonas.eurder.service.CustomerService;
 import com.jonas.eurder.service.OrderService;
 import com.jonas.eurder.service.SecurityService;
 import com.jonas.eurder.service.exception.ForbiddenException;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -31,20 +33,21 @@ public class CustomerController {
 
     @PostMapping(consumes = "application/json", produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
+    @SecurityRequirements
     public CustomerDTO registerNewCustomer(@Valid @RequestBody CreateCustomerDTO dto) {
         return customerService.createCustomer(dto);
     }
 
     @GetMapping(produces = "application/json")
     @ResponseStatus(HttpStatus.OK)
-    public List<CustomerDTO> getAllCustomers(@RequestHeader(value = "Authorization", required = false) String authorization) {
+    public List<CustomerDTO> getAllCustomers(@Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authorization) {
         securityService.validateAuthorization(authorization, Feature.VIEW_ALL_CUSTOMERS);
         return customerService.getAllCustomers();
     }
 
     @GetMapping(path = "/{id}", produces = "application/json")
     @ResponseStatus(HttpStatus.OK)
-    public CustomerDTO getCustomer(@RequestHeader(value = "Authorization", required = false) String authorization,
+    public CustomerDTO getCustomer(@Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authorization,
                                    @PathVariable String id) {
         securityService.validateAuthorization(authorization, Feature.VIEW_SINGLE_CUSTOMER);
         return customerService.getCustomer(id);
@@ -52,7 +55,7 @@ public class CustomerController {
 
     @GetMapping(path = "/{customerId}/orders", produces = "application/json")
     @ResponseStatus(HttpStatus.OK)
-    public OrderReportDTO getOrderReport(@RequestHeader(value = "Authorization", required = false) String authorization,
+    public OrderReportDTO getOrderReport(@Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authorization,
                                          @PathVariable String customerId) {
         User user = securityService.validateAuthorization(authorization, Feature.VIEW_REPORT_OF_ORDERS);
         if (!customerId.equals(user.getCustomerId())) {

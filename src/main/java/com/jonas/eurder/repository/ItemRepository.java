@@ -1,30 +1,7 @@
 package com.jonas.eurder.repository;
 
 import com.jonas.eurder.domain.Item;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-
-@Repository
-public class ItemRepository {
-
-    private final ConcurrentHashMap<String, Item> items;
-
-    public ItemRepository() {
-        this.items = new ConcurrentHashMap<>();
-    }
-
-    public void save(Item item) {
-        items.put(item.getId(), item);
-    }
-
-    public Optional<Item> getById(String id) {
-        return Optional.ofNullable(items.get(id));
-    }
-
-    public Collection<Item> getAll() {
-        return items.values();
-    }
+public interface ItemRepository extends JpaRepository<Item, String> {
 }

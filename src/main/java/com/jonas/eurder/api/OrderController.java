@@ -7,6 +7,7 @@ import com.jonas.eurder.domain.Feature;
 import com.jonas.eurder.domain.User;
 import com.jonas.eurder.service.OrderService;
 import com.jonas.eurder.service.SecurityService;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +28,7 @@ public class OrderController {
 
     @PostMapping(consumes = "application/json", produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public OrderDTO createNewOrder(@RequestHeader(value = "Authorization", required = false) String authorization,
+    public OrderDTO createNewOrder(@Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authorization,
                                    @Valid @RequestBody CreateOrderDTO dto) {
         User user = securityService.validateAuthorization(authorization, Feature.ORDER_ITEM);
         return orderService.placeOrder(user.getCustomerId(), dto);
@@ -35,7 +36,7 @@ public class OrderController {
 
     @PostMapping(path = "/{orderId}/reorder", produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public OrderDTO reorder(@RequestHeader(value = "Authorization", required = false) String authorization,
+    public OrderDTO reorder(@Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authorization,
                             @PathVariable String orderId) {
         User user = securityService.validateAuthorization(authorization, Feature.REORDER);
         return orderService.reorder(orderId, user.getCustomerId());
@@ -43,7 +44,7 @@ public class OrderController {
 
     @GetMapping(path = "/shipping-today", produces = "application/json")
     @ResponseStatus(HttpStatus.OK)
-    public List<ShipmentDTO> getTodaysShippingReport(@RequestHeader(value = "Authorization", required = false) String authorization) {
+    public List<ShipmentDTO> getTodaysShippingReport(@Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authorization) {
         securityService.validateAuthorization(authorization, Feature.VIEW_SHIPPING_TODAY);
         return orderService.getShippingToday();
     }

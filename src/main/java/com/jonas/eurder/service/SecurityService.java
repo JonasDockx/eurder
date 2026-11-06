@@ -8,11 +8,13 @@ import com.jonas.eurder.service.exception.UnauthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 @Service
+@Transactional(readOnly = true)
 public class SecurityService {
     private static final Logger logger = LoggerFactory.getLogger(SecurityService.class);
     private final UserRepository userRepository;
@@ -35,7 +37,7 @@ public class SecurityService {
             throw new UnauthorizedException("Missing credentials");
         }
         String[] credentials = decode(authorizationHeader.substring("Basic ".length()));
-        return userRepository.getByEmail(credentials[0])
+        return userRepository.findByEmail(credentials[0])
                 .filter(user -> user.passwordMatches(credentials[1]))
                 .orElseThrow(() -> new UnauthorizedException("Wrong email or password"));
     }

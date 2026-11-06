@@ -1,26 +1,12 @@
 package com.jonas.eurder.repository;
 
-import com.jonas.eurder.domain.Role;
 import com.jonas.eurder.domain.User;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
-@Repository
-public class UserRepository {
-    private final ConcurrentHashMap<String, User> users;
+public interface UserRepository extends JpaRepository<User, String> {
 
-    public UserRepository() {
-        this.users = new ConcurrentHashMap<>();
-        save(new User("admin@eurder.com", "admin", Role.ADMIN, null));
-    }
+    Optional<User> findByEmail(String email);
 
-    public Optional<User> getByEmail(String email) {
-        return Optional.ofNullable(users.get(email));
-    }
-
-    public void save(User user) {
-        users.put(user.getEmail(), user);
-    }
 }

@@ -1,5 +1,6 @@
 package com.jonas.eurder.api;
 
+import com.jonas.eurder.service.exception.EmailAlreadyExistsException;
 import com.jonas.eurder.service.exception.ForbiddenException;
 import com.jonas.eurder.service.exception.NotFoundException;
 import com.jonas.eurder.service.exception.UnauthorizedException;
@@ -55,6 +56,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleUnauthorized(UnauthorizedException exception) {
         logger.warn("Unauthorized: {}", exception.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<String> handleAlreadyExistingEmails(EmailAlreadyExistsException exception) {
+        logger.warn("Email address has already been registered.");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(exception.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)

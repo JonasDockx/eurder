@@ -11,6 +11,7 @@ import com.jonas.eurder.service.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@Transactional
 public class OrderService {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
@@ -43,7 +45,7 @@ public class OrderService {
     }
 
     public OrderDTO reorder(String orderId, String customerId) {
-        Order originalOrder = orderRepository.getById(orderId)
+        Order originalOrder = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order with id " + orderId + " cannot be found"));
         Customer customer = findCustomer(customerId);
         if (!originalOrder.belongsTo(customer.getId())) {
@@ -60,11 +62,12 @@ public class OrderService {
         return orderMapper.toDTO(newOrder);
     }
 
+    @Transactional(readOnly = true)
     public OrderReportDTO getOrderReport(String customerId) {
         if (!customerRepository.existsById(customerId)) {
             throw new NotFoundException("Customer with id " + customerId + " cannot be found");
         }
-        OrderReport report = new OrderReport(orderRepository.getByCustomerId(customerId));
+        OrderReport report = new OrderReport(orderRepository.findByCustomerId(customerId));
         logger.info("Order report requested for customer {}", customerId);
         return orderMapper.toReportDTO(report);
     }
@@ -90,7 +93,7 @@ public class OrderService {
     private Map<String, Item> findItems(List<CreateItemGroupDTO> requestedItemGroups) {
         Map<String, Item> itemsById = new HashMap<>();
         for (CreateItemGroupDTO requested : requestedItemGroups) {
-            Item item = itemRepository.getById(requested.itemId())
+            Item item = itemRepository.findById(requested.itemId())
                     .orElseThrow(() -> new NotFoundException("Item with id " + requested.itemId() + " could not be found"));
             itemsById.put(item.getId(), item);
         }
@@ -98,20 +101,21 @@ public class OrderService {
     }
 
     private Customer findCustomer(String customerId) {
-        return customerRepository.getById(customerId)
+        return customerRepository.findById(customerId)
                 .orElseThrow(() -> new NotFoundException("Customer with id " + customerId + " cannot be found"));
     }
 
+    @Transactional(readOnly = true)
     public List<ShipmentDTO> getShippingToday() {
         LocalDate today = LocalDate.now();
         List<ShipmentDTO> shipments = new ArrayList<>();
 
-        for (Order order : orderRepository.getAll()) {
+        for (Order order : orderRepository.findAll()) {
             List<ItemGroup> itemGroupsShippingToday = order.getItemGroupsShippingOn(today);
             if (itemGroupsShippingToday.isEmpty()) {
                 continue;
             }
-            Customer customer = customerRepository.getById(order.getCustomerId())
+            Customer customer = customerRepository.findById(order.getCustomerId())
                     .orElseThrow(() -> new IllegalStateException(
                             "Order " + order.getId() + " refers to unknown customer " + order.getCustomerId()));
             shipments.add(orderMapper.toShipmentDTO(order, itemGroupsShippingToday, customer.getAddress()));

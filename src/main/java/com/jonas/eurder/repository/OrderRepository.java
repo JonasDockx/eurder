@@ -1,37 +1,11 @@
 package com.jonas.eurder.repository;
 
 import com.jonas.eurder.domain.Order;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
-@Repository
-public class OrderRepository {
+public interface OrderRepository extends JpaRepository<Order, String> {
 
-    private final ConcurrentHashMap<String, Order> orders;
-
-    public OrderRepository() {
-        this.orders = new ConcurrentHashMap<>();
-    }
-
-    public void save(Order order) {
-        orders.put(order.getId(), order);
-    }
-
-    public Optional<Order> getById(String id) {
-        return Optional.ofNullable(orders.get(id));
-    }
-
-    public List<Order> getByCustomerId(String customerId) {
-        return orders.values().stream()
-                .filter(order -> order.getCustomerId().equals(customerId))
-                .toList();
-    }
-
-    public Collection<Order> getAll() {
-        return orders.values();
-    }
+    List<Order> findByCustomerId(String customerId);
 }
