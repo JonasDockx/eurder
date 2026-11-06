@@ -128,4 +128,26 @@ class ItemTest {
 
         assertThat(item.getUrgencyLevel()).isEqualByComparingTo(UrgencyLevel.STOCK_HIGH);
     }
+
+    @Test
+    void equals_givenSameInstance_thenTrue() {
+        Item item = new Item("Book A", "A long book", new BigDecimal("14.99"), 20);
+
+        assertThat(item.equals(item)).isTrue();
+    }
+
+    @Test
+    void equals_givenOtherItem_thenFalse() {
+        Item book = new Item("Book A", "A long book", new BigDecimal("14.99"), 20);
+        Item pen = new Item("Pen", "A blue pen", new BigDecimal("1.50"), 5);
+
+        assertThat(book.equals(pen)).isFalse();
+    }
+
+    @Test
+    void equals_givenOtherType_thenFalse() {
+        Item item = new Item("Book A", "A long book", new BigDecimal("14.99"), 20);
+
+        assertThat(item.equals("Not an item")).isFalse();
+    }
 }

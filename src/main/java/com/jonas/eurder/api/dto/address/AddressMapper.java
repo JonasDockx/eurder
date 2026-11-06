@@ -7,9 +7,6 @@ import org.springframework.stereotype.Component;
 public class AddressMapper {
 
     public Address toAddress(AddressDTO dto) {
-        if (dto == null) {
-            return null;
-        }
         return new Address(
                 dto.street(),
                 dto.houseNumber(),

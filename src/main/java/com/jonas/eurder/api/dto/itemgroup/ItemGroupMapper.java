@@ -9,10 +9,6 @@ import java.util.List;
 public class ItemGroupMapper {
 
     public ItemGroupDTO toDTO(ItemGroup itemGroup) {
-        if (itemGroup == null) {
-            return null;
-        }
-
         return new ItemGroupDTO(
                 itemGroup.getItemId(),
                 itemGroup.getItemName(),

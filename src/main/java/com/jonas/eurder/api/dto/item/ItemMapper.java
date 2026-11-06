@@ -16,10 +16,6 @@ public class ItemMapper {
     }
 
     public ItemDTO toDTO(Item item) {
-        if (item == null) {
-            return null;
-        }
-
         return new ItemDTO(
                 item.getId(),
                 item.getName(),
@@ -30,10 +26,6 @@ public class ItemMapper {
     }
 
     public ItemWithStockLevelDTO toItemWithStockLevelDTO(Item item) {
-        if (item == null) {
-            return null;
-        }
-
         return new ItemWithStockLevelDTO(
                 item.getId(),
                 item.getName(),

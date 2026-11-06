@@ -108,9 +108,8 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.16</version>
                 <configuration>
-                    <exclude>
-                        com/jonas/eurder/EurderApplication.class
-                    </exclude>
+                    <exclude>com/jonas/eurder/EurderApplication.class</exclude>
+                    <exclude>com/jonas/eurder/config/OpenApiConfig.class</exclude>
                 </configuration>
                 <executions>
                     <execution>

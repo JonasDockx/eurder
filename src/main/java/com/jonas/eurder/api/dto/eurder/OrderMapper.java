@@ -24,10 +24,6 @@ public class OrderMapper {
     }
 
     public OrderDTO toDTO(Order order) {
-        if (order == null) {
-            return null;
-        }
-
         List<ItemGroupDTO> itemGroupDTOS = itemGroupMapper.toDTO(order.getItemGroups());
 
         return new OrderDTO(

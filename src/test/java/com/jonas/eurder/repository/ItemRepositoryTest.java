@@ -22,13 +22,15 @@ class ItemRepositoryTest {
     private final Item item = new Item("Laptop", "A Lenovo Laptop", new BigDecimal("2999.99"), 5);
 
     @Test
-    void givenSaveItem_whenFindById_thenShouldReturnTheSameItem() {
+    void givenSaveItem_whenFindById_thenReturnsEqualCopyWithAllFields() {
         itemRepository.save(item);
         entityManager.flush();
         entityManager.clear();
 
         Item found = itemRepository.findById(item.getId()).orElseThrow();
 
-        assertThat(found).isEqualTo(item);
+        assertThat(found).isNotSameAs(item);
+        assertThat(found).isEqualTo(item).hasSameHashCodeAs(item);
+        assertThat(found).usingRecursiveComparison().isEqualTo(item);
     }
 }

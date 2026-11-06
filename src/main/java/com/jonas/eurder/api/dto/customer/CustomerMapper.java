@@ -24,10 +24,6 @@ public class CustomerMapper {
     }
 
     public CustomerDTO toDTO(Customer customer) {
-        if (customer == null) {
-            return null;
-        }
-
         return new CustomerDTO(
                 customer.getId(),
                 customer.getFirstName(),

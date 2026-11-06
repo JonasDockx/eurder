@@ -24,13 +24,15 @@ class CustomerRepositoryTest {
     private final Customer customer = new Customer("Jonas", "Dockx", "jonas@test.com", address, "0123456789");
 
     @Test
-    void givenSavedCustomer_whenFindById_thenShouldReturnTheSameCustomer() {
+    void givenSavedCustomer_whenFindById_thenReturnsEqualCopyWithAllFields() {
         customerRepository.save(customer);
         entityManager.flush();
         entityManager.clear();
 
         Customer found = customerRepository.findById(customer.getId()).orElseThrow();
 
+        assertThat(found).isNotSameAs(customer);
+        assertThat(found).isEqualTo(customer).hasSameHashCodeAs(customer);
         assertThat(found).usingRecursiveComparison().isEqualTo(customer);
     }
 

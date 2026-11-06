@@ -47,7 +47,7 @@ class OrderRepositoryTest {
     }
 
     @Test
-    void givenSavedOrder_whenFindById_thenShouldReturnTheSameOrder() {
+    void givenSavedOrder_whenFindById_thenReturnsEqualCopyWithAllFields() {
         Order order = new Order(jonas.getId(), List.of(
                 new ItemGroup(book, 2, ORDER_DATE),
                 new ItemGroup(pen, 4, ORDER_DATE)
@@ -57,6 +57,9 @@ class OrderRepositoryTest {
         entityManager.clear();
 
         Order found = orderRepository.findById(order.getId()).orElseThrow();
+
+        assertThat(found).isNotSameAs(order);
+        assertThat(found).isEqualTo(order).hasSameHashCodeAs(order);
 
         assertThat(found.getCustomerId()).isEqualTo(jonas.getId());
         assertThat(found.getItemGroups())

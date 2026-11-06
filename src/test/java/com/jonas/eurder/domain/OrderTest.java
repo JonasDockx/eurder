@@ -79,4 +79,29 @@ class OrderTest {
 
         assertThat(order.getItemGroupsShippingOn(LocalDate.of(2026, 10, 21))).isEmpty();
     }
+
+    @Test
+    void equals_givenSameInstance_thenTrue() {
+        Item book = new Item("Book A", "A long book", new BigDecimal("14.99"), 5);
+        Order order = new Order("customer-id", List.of(new ItemGroup(book, 1, ORDER_DATE)));
+
+        assertThat(order.equals(order)).isTrue();
+    }
+
+    @Test
+    void equals_givenOtherOrder_thenFalse() {
+        Item book = new Item("Book A", "A long book", new BigDecimal("14.99"), 5);
+        Order order = new Order("customer-id", List.of(new ItemGroup(book, 1, ORDER_DATE)));
+        Order order2 = new Order("customer-id", List.of(new ItemGroup(book, 2, ORDER_DATE)));
+
+        assertThat(order.equals(order2)).isFalse();
+    }
+
+    @Test
+    void equals_givenOtherType_thenFalse() {
+        Item book = new Item("Book A", "A long book", new BigDecimal("14.99"), 5);
+        Order order = new Order("customer-id", List.of(new ItemGroup(book, 1, ORDER_DATE)));
+
+        assertThat(order.equals("Not a book")).isFalse();
+    }
 }
