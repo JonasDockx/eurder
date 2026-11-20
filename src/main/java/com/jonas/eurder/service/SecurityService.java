@@ -32,7 +32,7 @@ public class SecurityService {
         return user;
     }
 
-    private User authenticate(String authorizationHeader) {
+    public User authenticate(String authorizationHeader) {
         if (authorizationHeader == null || !authorizationHeader.startsWith("Basic ")) {
             throw new UnauthorizedException("Missing credentials");
         }

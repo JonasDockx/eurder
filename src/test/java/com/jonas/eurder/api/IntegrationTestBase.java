@@ -41,7 +41,7 @@ public abstract class IntegrationTestBase {
     protected Customer saveCustomer(String firstName) {
         String email = uniqueEmail(firstName);
         Customer customer = new Customer(firstName, "Test", email,
-                new Address("Test street", "1", "1000", "Brussels"),
+                new Address("Test street", "1", "1000", "Brussels", "Belgium"),
                 "0123456789");
         customerRepository.save(customer);
         userRepository.save(new User(email, IntegrationTestBase.PASSWORD, Role.CUSTOMER, customer.getId()));

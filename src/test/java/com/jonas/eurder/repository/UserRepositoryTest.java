@@ -33,7 +33,7 @@ class UserRepositoryTest {
     void givenSavedCustomerUser_whenFindById_thenReturnsEqualCopyWithRoleAndCustomer() {
         Customer customer = customerRepository.save(
                 new Customer("Jonas", "Dockx", "jonas@test.com",
-                        new Address("Test street", "1", "1000", "Brussels"), "0123456789")
+                        new Address("Test street", "1", "1000", "Brussels", "Belgium"), "0123456789")
         );
         User user = new User("jonas@test.com", "secret", Role.CUSTOMER, customer.getId());
 

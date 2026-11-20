@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CustomerTest {
 
-    private final Address address = new Address("Test Street", "1", "1000", "Brussels");
+    private final Address address = new Address("Test Street", "1", "1000", "Brussels", "Belgium");
 
     private Customer createCustomer(String firstName, String email) {
         return new Customer(firstName, "Dockx", email, address, "0123456789");
@@ -77,6 +77,30 @@ class CustomerTest {
         Customer customer = createCustomer("Jonas", "jonas@test.com");
 
         assertThat(customer.equals(null)).isFalse();
+    }
+
+    @Test
+    void update_givenValidData_thenAllFieldsAreReplaced() {
+        Customer customer = createCustomer("Jonas", "jonas@test.com");
+        Address newAddress = new Address("Rue X", "5", "75001", "Paris", "France");
+
+        customer.update("Jan", "Janssens", "jan@test.com", newAddress, "0477000000");
+
+        assertThat(customer.getFirstName()).isEqualTo("Jan");
+        assertThat(customer.getLastName()).isEqualTo("Janssens");
+        assertThat(customer.getEmail()).isEqualTo("jan@test.com");
+        assertThat(customer.getAddress()).isEqualTo(newAddress);
+        assertThat(customer.getPhoneNumber()).isEqualTo("0477000000");
+    }
+
+    @Test
+    void update_givenBlankLastName_thenThrowsAndNothingChanges() {
+        Customer customer = createCustomer("Jonas", "jonas@test.com");
+
+        assertThatThrownBy(() -> customer.update("Jan", " ", "jan@test.com", address, "0477000000"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Last name must be provided");
+        assertThat(customer.getFirstName()).isEqualTo("Jonas");
     }
 
 }

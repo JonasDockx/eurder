@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class OrderRepositoryTest {
 
     private static final LocalDate ORDER_DATE = LocalDate.of(2026, 10, 20);
-    private static final Address ADDRESS = new Address("Test Street", "1", "1000", "Brussels");
+    private static final Address ADDRESS = new Address("Test Street", "1", "1000", "Brussels", "Belgium");
 
     @Autowired
     private OrderRepository orderRepository;

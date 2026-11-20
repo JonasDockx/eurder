@@ -11,7 +11,8 @@ public class AddressMapper {
                 dto.street(),
                 dto.houseNumber(),
                 dto.postalCode(),
-                dto.city()
+                dto.city(),
+                dto.country()
         );
     }
 
@@ -20,7 +21,8 @@ public class AddressMapper {
                 address.street(),
                 address.houseNumber(),
                 address.postalCode(),
-                address.city()
+                address.city(),
+                address.country()
         );
     }
 }

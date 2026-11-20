@@ -44,6 +44,14 @@ public class ItemService {
     }
 
     @Transactional(readOnly = true)
+    public ItemWithStockLevelDTO getItem(String id) {
+        logger.info("Fetching item with id {}", id);
+        return itemRepository.findById(id)
+                .map(itemMapper::toItemWithStockLevelDTO)
+                .orElseThrow(() -> new NotFoundException("Item with id " + id + " could not be found"));
+    }
+
+    @Transactional(readOnly = true)
     public List<ItemWithStockLevelDTO> getItemsWithStockLevels(UrgencyLevel urgencyLevel) {
         logger.info("Fetching items with stock levels, filter: {}", urgencyLevel);
         return itemRepository.findAll().stream()
