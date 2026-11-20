@@ -20,7 +20,7 @@ class CustomerRepositoryTest {
     @Autowired
     private TestEntityManager entityManager;
 
-    private final Address address = new Address("Test Street", "1", "1000", "Brussels");
+    private final Address address = new Address("Test Street", "1", "1000", "Brussels", "Belgium");
     private final Customer customer = new Customer("Jonas", "Dockx", "jonas@test.com", address, "0123456789");
 
     @Test

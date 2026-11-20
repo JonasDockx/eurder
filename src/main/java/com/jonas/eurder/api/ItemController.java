@@ -9,6 +9,7 @@ import com.jonas.eurder.domain.UrgencyLevel;
 import com.jonas.eurder.service.ItemService;
 import com.jonas.eurder.service.SecurityService;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +42,20 @@ public class ItemController {
                               @Valid @RequestBody UpdateItemDTO dto, @PathVariable String id) {
         securityService.validateAuthorization(authorization, Feature.UPDATE_ITEM);
         return itemService.updateItem(id, dto);
+    }
+
+    @GetMapping(produces = "application/json")
+    @ResponseStatus(HttpStatus.OK)
+    @SecurityRequirements
+    public List<ItemWithStockLevelDTO> getAllItems() {
+        return itemService.getItemsWithStockLevels(null);
+    }
+
+    @GetMapping(path = "/{id}", produces = "application/json")
+    @ResponseStatus(HttpStatus.OK)
+    @SecurityRequirements
+    public ItemWithStockLevelDTO getItem(@PathVariable String id) {
+        return itemService.getItem(id);
     }
 
     @GetMapping(path = "/stock", produces = "application/json")

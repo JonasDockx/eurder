@@ -2,6 +2,7 @@ package com.jonas.eurder.api;
 
 import com.jonas.eurder.api.dto.customer.CreateCustomerDTO;
 import com.jonas.eurder.api.dto.customer.CustomerDTO;
+import com.jonas.eurder.api.dto.customer.UpdateCustomerDTO;
 import com.jonas.eurder.api.dto.eurder.OrderReportDTO;
 import com.jonas.eurder.domain.Feature;
 import com.jonas.eurder.domain.User;
@@ -51,6 +52,15 @@ public class CustomerController {
                                    @PathVariable String id) {
         securityService.validateAuthorization(authorization, Feature.VIEW_SINGLE_CUSTOMER);
         return customerService.getCustomer(id);
+    }
+
+    @PutMapping(path = "/{id}", consumes = "application/json", produces = "application/json")
+    @ResponseStatus(HttpStatus.OK)
+    public CustomerDTO updateCustomer(@Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authorization,
+                                      @PathVariable String id,
+                                      @Valid @RequestBody UpdateCustomerDTO dto) {
+        securityService.validateAuthorization(authorization, Feature.UPDATE_CUSTOMER);
+        return customerService.updateCustomer(id, dto);
     }
 
     @GetMapping(path = "/{customerId}/orders", produces = "application/json")

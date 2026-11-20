@@ -33,6 +33,20 @@ public class Customer {
         this.phoneNumber = validateNotBlank(phoneNumber, "Phone number");
     }
 
+    public void update(String firstName, String lastName, String email, Address address, String phoneNumber) {
+        String validatedFirstName = validateNotBlank(firstName, "First name");
+        String validatedLastName = validateNotBlank(lastName, "Last name");
+        String validatedEmail = validateNotBlank(email, "E-mail");
+        Address validatedAddress = validateNotNull(address, "Address");
+        String validatedPhoneNumber = validateNotBlank(phoneNumber, "Phone number");
+
+        this.firstName = validatedFirstName;
+        this.lastName = validatedLastName;
+        this.email = validatedEmail;
+        this.address = validatedAddress;
+        this.phoneNumber = validatedPhoneNumber;
+    }
+
     public String getId() {
         return id;
     }

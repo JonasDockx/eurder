@@ -41,6 +41,14 @@ public class User {
         return this.password.equals(password);
     }
 
+    public Role getRole() {
+        return role;
+    }
+
+    public User withEmail(String newEmail) {
+        return new User(newEmail, password, role, customerId);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof User user)) return false;
